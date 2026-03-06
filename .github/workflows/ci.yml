@@ -27,7 +27,7 @@ jobs:
 
       - name: Run tests
         run: |
-          pytest tests/ -v4
+          pytest tests/ -v
       
       - name: Lint with flake8
         run: |
