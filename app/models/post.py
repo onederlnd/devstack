@@ -2,36 +2,43 @@
 
 from app.models import get_db
 
+PER_PAGE = 20
+
 
 # --- feed
-def get_feed(limit=50, topic_id=None):
+def get_feed(page=1, topic_id=None):
+    offset = (page - 1) * PER_PAGE
     db = get_db()
     if topic_id:
-        return db.execute(
+        rows = db.execute(
             """
             SELECT posts.*, users.username, topics.name as topic_name
                           FROM posts
-                          JOIN users ON posts.user_id = user_id
+                          JOIN users ON posts.user_id = users.id
                           LEFT JOIN topics ON posts.topic_id = topics.id
                           WHERE posts.parent_id IS NULL
                           AND posts.topic_id = ?
                           ORDER BY posts.votes DESC, posts.created_at DESC
-                          LIMIT ?
+                          LIMIT ? OFFSET ?
         """,
-            (topic_id, limit),
+            (topic_id, PER_PAGE + 1, offset),
         ).fetchall()
-    return db.execute(
-        """
-    SELECT posts.*, users.username, topics.name as topic_name
+    else:
+        rows = db.execute(
+            """
+            SELECT posts.*, users.username, topics.name as topic_name
                       FROM posts
                       JOIN users ON posts.user_id = users.id
                       LEFT JOIN topics on posts.topic_id = topics.id
                       WHERE posts.parent_id IS NULL
                       ORDER BY posts.votes DESC, posts.created_at DESC
-                      LIMIT ?
-    """,
-        (limit,),
-    ).fetchall()
+                      LIMIT ? OFFSET ?
+        """,
+            (PER_PAGE + 1, offset),
+        ).fetchall()
+
+    has_next = len(rows) > PER_PAGE
+    return rows[:PER_PAGE], has_next
 
 
 # --- posting
@@ -58,7 +65,7 @@ def get_post(post_id):
         """
         SELECT posts.*, users.username, topics.name as topic_name
                      FROM posts
-                     JOIN users ON posts.user_id = user_id
+                     JOIN users ON posts.user_id == users.id
                      LEFT JOIN topics ON posts.topic_id = topics.id
                      WHERE posts.id = ?
         """,
@@ -151,12 +158,10 @@ def vote_post(user_id, post_id, value):
 # --- bookmarks
 def toggle_bookmark(user_id, post_id):
     db = get_db()
-    print(f"DEBUG toggle_bookmark: user_id={user_id}, post_id={post_id}")
     existing = db.execute(
         "SELECT user_id FROM bookmarks WHERE user_id=? AND post_id=?",
         (user_id, post_id),
     ).fetchone()
-    print(f"DEBUG existing={existing}")
 
     if existing:
         db.execute(
@@ -165,11 +170,10 @@ def toggle_bookmark(user_id, post_id):
         db.commit()
         return False
     else:
-        result = db.execute(
+        db.execute(
             "INSERT INTO bookmarks (user_id, post_id) VALUES (?, ?)", (user_id, post_id)
         )
         db.commit()
-        print(f"DEBUG inserted rowid={result.lastrowid}")
         return True
 
 

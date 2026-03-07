@@ -133,3 +133,11 @@ def test_edit_post_forbidden(auth_client, app):
     )
     print(f"DEBUG edit status: {response.status_code}")
     assert response.status_code == 403
+
+
+def test_feed_pagination(auth_client):
+    response = auth_client.get("/?page=1")
+    assert response.status_code == 200
+
+    response = auth_client.get("/?page=99")
+    assert response.status_code == 200

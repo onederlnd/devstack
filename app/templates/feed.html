@@ -53,6 +53,26 @@
       </div>
     </div>
     {% endfor %}
+    <div class="pagination">
+      {% if page > 1 %}
+        {% if active_topic %}
+          <a href="/t/{{ active_topic.name }}?page={{ page - 1 }}" class="page-btn">← prev</a>
+        {% else %}
+          <a href="/?page={{ page - 1 }}" class="page-btn">← prev</a>
+        {% endif %}
+      {% endif %}
+    
+      <span class="page-num">page {{ page }}</span>
+    
+      {% if has_next %}
+        {% if active_topic %}
+          <a href="/t/{{ active_topic.name }}?page={{ page + 1 }}" class="page-btn">next →</a>
+        {% else %}
+          <a href="/?page={{ page + 1 }}" class="page-btn">next →</a>
+        {% endif %}
+      {% endif %}
+    </div>
+    </div>
   </div>
 {% else %}
   <div class="empty-state">
