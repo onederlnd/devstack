@@ -1,16 +1,11 @@
+# dev workflow: test -> lint -> commit -> push
+
 #!/bin/bash
-# bash ./script/ship.sh
-set -e # stop on any error
 
-# activate virtual environment
+
+set -e
+
 . .venv/bin/activate
-
-# prevent accidental push from wrong branch
-branch=$(git rev-parse --abbrev-ref HEAD)
-if [ "$branch" != "main" ]; then
-    echo "== not on main branch (currently on '$branch')"
-    exit 1
-fi
 
 echo "== running tests..."
 pytest tests/ -v
@@ -18,7 +13,7 @@ pytest tests/ -v
 echo "== linting..."
 flake8 app/ --max-line-length=100 --ignore=E501,W503
 
-echo " == staging changes..."
+echo "== staging changes..."
 git add .
 git status
 
@@ -31,7 +26,14 @@ if [ -z "$msg" ]; then
 fi
 
 git commit -m "$msg"
-git push
 
-echo "== shipped!"
+# moved here — no longer blocks feature branches
+branch=$(git rev-parse --abbrev-ref HEAD)
+git push -u origin "$branch"
 
+echo "== shipped on branch: $branch"
+
+# notify instead of exit
+if [ "$branch" != "main" ]; then
+    echo "== open a PR at: https://github.com/onederlnd/devstack/compare/$branch"
+fi
