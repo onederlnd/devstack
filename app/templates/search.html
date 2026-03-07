@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}search — devstack{% endblock %}
+
+{% block content %}
+<div class="search-header">
+  <form method="GET" action="/search" class="search-form">
+    <input type="text" name="q" value="{{ query }}"
+           placeholder="search stacks and topics..."
+           autofocus class="search-input">
+    <!-- tabs switch between searching posts and topics -->
+    <div class="search-tabs">
+      <a href="/search?q={{ query }}&type=posts"
+         class="search-tab {% if search_type == 'posts' %}active{% endif %}">posts</a>
+      <a href="/search?q={{ query }}&type=topics"
+         class="search-tab {% if search_type == 'topics' %}active{% endif %}">topics</a>
+    </div>
+    <button type="submit" class="btn-submit">search</button>
+  </form>
+</div>
+
+{% if query %}
+  {% if search_type == 'posts' %}
+    {% if posts %}
+      <div class="post-list">
+        {% for post in posts %}
+        <div class="post-card">
+          <div class="vote-col">
+            <span class="vote-count">{{ post.votes }}</span>
+          </div>
+          <div class="post-body">
+            <div class="post-meta">
+              {% if post.topic_name %}
+                <a href="/t/{{ post.topic_name }}" class="post-topic">/t/{{ post.topic_name }}</a>
+              {% endif %}
+              <span class="post-author">@{{ post.username }}</span>
+            </div>
+            <a href="/posts/{{ post.id }}" class="post-title">{{ post.title }}</a>
+            <p class="post-preview">{{ post.body | truncate(140) }}</p>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      <!-- pagination reuses same pattern as feed -->
+      <div class="pagination">
+        {% if page > 1 %}
+          <a href="/search?q={{ query }}&type=posts&page={{ page - 1 }}" class="page-btn">← prev</a>
+        {% endif %}
+        <span class="page-num">page {{ page }}</span>
+        {% if has_next %}
+          <a href="/search?q={{ query }}&type=posts&page={{ page + 1 }}" class="page-btn">next →</a>
+        {% endif %}
+      </div>
+    {% else %}
+      <div class="empty-state">no posts found for "{{ query }}"</div>
+    {% endif %}
+
+  {% else %}
+    {% if topics %}
+      <div class="topics-grid">
+        {% for topic in topics %}
+        <a href="/t/{{ topic.name }}" class="topic-card">
+          <div class="topic-card-name">/t/{{ topic.name }}</div>
+          <div class="topic-card-desc">{{ topic.description or "no description" }}</div>
+          <div class="topic-card-count">{{ topic.post_count }} stacks</div>
+        </a>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state">no topics found for "{{ query }}"</div>
+    {% endif %}
+  {% endif %}
+{% else %}
+  <div class="empty-state">enter a search term above</div>
+{% endif %}
+{% endblock %}

@@ -51,6 +51,13 @@ def create_post(user_id, title, body, topic_id=None, parent_id=None):
         (user_id, topic_id, title, body, parent_id),
     )
     db.commit()
+
+    db.execute(
+        "INSERT INTO posts_fts(rowid, title, body) VALUES (?, ?, ?)",
+        (cursor.lastrowid, title, body),
+    )
+    db.commit()
+
     if parent_id:
         db.execute(
             "UPDATE posts SET reply_count = reply_count + 1 WHERE id = ?", (parent_id,)
@@ -200,3 +207,26 @@ def is_bookmarked(user_id, post_id):
         (user_id, post_id),
     ).fetchone()
     return result is not None
+
+
+# --- search
+def search_posts(query, page=1):
+    offset = (page - 1) * PER_PAGE
+    db = get_db()
+
+    rows = db.execute(
+        """
+        SELECT posts.*, users.username, topics.name as topic_name
+                      FROM posts_fts
+                      JOIN posts ON posts_fts.rowid = posts.id
+                      JOIN users ON posts.user_id = users.id
+                      LEFT JOIN topics on posts.topic_id = topics.id
+                      WHERE posts_fts MATCH ?
+                      AND posts.parent_id IS NULL
+                      ORDER BY rank
+                      LIMIT ? OFFSET ?
+        """,
+        (query, PER_PAGE + 1, offset),
+    ).fetchall()
+    has_next = len(rows) > PER_PAGE
+    return rows[:PER_PAGE], has_next

@@ -111,5 +111,10 @@ def init_db(app):
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 PRIMARY KEY(user_id, post_id)
             );
+            CREATE VIRTUAL TABLE IF NOT EXISTS posts_fts
+                USING fts5(title, body, content=posts, content_rowid=10);
+
+            CREATE VIRTUAL TABLE IF NOT EXISTS topics_fts
+                USING fts5(name, description, content=topics, content_rowid=id);
         """)
         db.commit()

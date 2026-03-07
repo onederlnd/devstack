@@ -16,8 +16,13 @@ def get_topic_by_name(name):
 def create_topic(name, description=""):
     db = get_db()
     try:
-        db.execute(
+        cursor = db.execute(
             "INSERT INTO topics (name, description) VALUES(?, ?)", (name, description)
+        )
+        db.commit()
+        db.execute(
+            "INSERT INTO topics_fts(rowid, name, description) VALUES(?, ?, ?)",
+            (cursor.lastrowid, name, description or ""),
         )
         db.commit()
         return True, None
@@ -48,3 +53,20 @@ def get_all_topics_with_counts():
                       GROUP BY topics.id
                       ORDER BY post_count DESC, topics.name ASC
     """).fetchall()
+
+
+def search_topics(query):
+    db = get_db()
+
+    return db.execute(
+        """
+        SELECT topics.*, COUNT(posts.id) as post_count
+                      FROM topics_fts
+                      JOIN topics ON topics_fts.rowid = topics.id
+                      LEFT JOIN posts ON posts.topic_id = topics.id
+                      WHERE topics_fts MATCH ?
+                      GROUP BY topics.id
+                      ORDER BY rank
+    """,
+        (query,),
+    ).fetchall()

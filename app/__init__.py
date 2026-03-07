@@ -51,18 +51,22 @@ def create_app(config=None):
 
     init_db(app)
 
-    # Register blueprints (routes)
+    # import blueprints
     from app.routes.auth import auth_bp
     from app.routes.feed import feed_bp
     from app.routes.posts import posts_bp
     from app.routes.profile import profile_bp
     from app.routes.topics import topics_bp
+    from app.routes.search import search_bp
 
+    # register app
     app.register_blueprint(auth_bp)
     app.register_blueprint(feed_bp)
     app.register_blueprint(posts_bp)
     app.register_blueprint(profile_bp)
     app.register_blueprint(topics_bp)
-    app.jinja_env.filters["time_ago"] = time_ago
+    app.register_blueprint(search_bp)
 
+    # register other
+    app.jinja_env.filters["time_ago"] = time_ago
     return app

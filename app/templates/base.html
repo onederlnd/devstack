@@ -11,11 +11,11 @@
 <body>
   <nav class="topbar">
     <a href="/" class="logo">⬡ devstack</a>
-    <div class="nav-topics">
-      {% for t in topics | default([]) %}
-        <a href="/t/{{ t.name }}" class="topic-pill">/t/{{ t.name }}</a>
-      {% endfor %}
-    </div>
+  <div class="nav-search">
+    <form method="GET" action="/search">
+      <input type="text" name="q" placeholder="search..." class="nav-search-input">
+    </form>
+  </div>
   <div class="nav-actions">
     {% if session.username %}
       <a href="/topics" class="nav-link">topics</a>
