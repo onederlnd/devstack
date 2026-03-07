@@ -125,5 +125,15 @@ def init_db(app):
                 FOREIGN KEY (follower_id) REFERENCES users(id),
                 FOREIGN KEY (followed_id) REFERENCES users(id)
             );
+            CREATE TABLE IF NOT EXISTS notifications (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                type TEXT NOT NULL,
+                message TEXT NOT NULL,
+                link TEXT,
+                is_read INTEGER DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users(id)
+            );
         """)
         db.commit()

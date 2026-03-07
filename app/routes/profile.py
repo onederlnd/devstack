@@ -6,8 +6,11 @@ from app.models.user import (
     is_following,
     unfollow_user,
     follow_user,
+    get_following_count,
+    get_followers_count,
 )
 from app.models.post import get_posts_by_user, get_bookmarks, toggle_bookmark
+from app.models.notifications import create_notification
 from app.routes.feed import login_required
 
 profile_bp = Blueprint("profile", __name__)
@@ -22,13 +25,20 @@ def view_profile(username):
         return "User not found", 404
 
     posts = get_posts_by_user(user["id"])
-    bookmarks = []
-
-    if session["username"] == username:
-        bookmarks = get_bookmarks(user["id"])
+    bookmarks = get_bookmarks(user["id"]) if session["user_id"] == user["id"] else []
+    following = is_following(session["user_id"], user["id"])
+    followers_count = get_followers_count(user["id"])
+    following_count = get_following_count(user["id"])
+    bookmarks = get_bookmarks(user["id"])
 
     return render_template(
-        "profile.html", profile_user=user, posts=posts, bookmarks=bookmarks
+        "profile.html",
+        profile_user=user,
+        posts=posts,
+        bookmarks=bookmarks,
+        following=following,
+        followers_count=followers_count,
+        following_count=following_count,
     )
 
 
@@ -49,6 +59,13 @@ def follow(username):
         unfollow_user(session["user_id"], user["id"])
     else:
         follow_user(session["user_id"], user["id"])
+        # --- notifications
+        create_notification(
+            user_id=user["id"],
+            type="follow",
+            message=f"@{session['username']} followed you",
+            link=f"/profile/{session['username']}",
+        )
 
     return redirect(url_for("profile.view_profile", username=username))
 

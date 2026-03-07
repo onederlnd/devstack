@@ -12,4 +12,6 @@ git checkout main
 git pull
 git checkout -b feat/$name
 
+cp NOTES-template.md NOTES.md
 echo "== created and switched to branch: feat/$name"
+echo "== NOTES.md created - fill it in before writing code"

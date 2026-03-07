@@ -18,6 +18,7 @@ from app.models.post import (
     delete_post,
 )
 from app.models.topic import get_all_topics
+from app.models.notifications import create_notification
 from app.routes.feed import login_required
 
 # define blueprint
@@ -119,6 +120,14 @@ def reply(post_id):
     body = request.form["body"].strip()
     if body:
         create_post(session["user_id"], "re: reply", body, parent_id=post_id)
+        parent = get_post(post_id)
+        if parent and parent["user_id"] != session["user_id"]:
+            create_notification(
+                user_id=parent["user_id"],
+                type="reply",
+                message=f"@{session['username']} replied to your post",
+                link=f"/posts/{post_id}",
+            )
     return redirect(url_for("posts.view_post", post_id=post_id))
 
 
