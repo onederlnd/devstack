@@ -10,6 +10,23 @@
       <p class="profile-bio">{{ profile_user.bio }}</p>
     {% endif %}
     <span class="profile-meta">joined {{ profile_user.created_at }}</span>
+
+    <div class="profile-stats">
+      <span>{{ followers_count }} followers</span>
+      <span>{{ following_count }} following</span>
+    </div>
+
+    {% if profile_user.id != session.user_id %}
+      <form method="POST" action="/profile/{{ profile_user.username }}/follow"
+        {% if following %}
+          onsubmit="return confirm('unfollow {{ profile_user.username }}?')"
+        {% endif %}>
+        <button class="btn-follow {% if following %}btn-unfollow{% endif %}">
+          {{ 'unfollow' if following else 'follow' }}
+        </button>
+      </form>
+    {% endif %}
+
   </div>
 </div>
 
