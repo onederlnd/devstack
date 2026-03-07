@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}notifications — devstack{% endblock %}
+
+{% block content %}
+<div class="feed-header">
+  <h1 class="feed-title">notifications</h1>
+  {% if notifications %}
+    <form method="POST" action="/notifications/read">
+      <button class="btn-cancel">mark all read</button>
+    </form>
+  {% endif %}
+</div>
+
+{% if notifications %}
+  <div class="notification-list">
+    {% for n in notifications %}
+    <a href="{{ n.link or '/' }}" class="notification-item {% if not n.is_read %}unread{% endif %}">
+      <div class="notification-type">[{{ n.type }}]</div>
+      <div class="notification-body">
+        <div class="notification-message">{{ n.message }}</div>
+        <div class="notification-time">{{ n.created_at | time_ago }}</div>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="empty-state">no notifications yet.</div>
+{% endif %}
+{% endblock %}

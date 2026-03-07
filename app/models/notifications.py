@@ -1,4 +1,5 @@
 # app/models/notifications.py
+
 from app.models import get_db
 
 
