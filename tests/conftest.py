@@ -22,6 +22,7 @@ def app():
         {
             "TESTING": True,
             "DATABASE_URL": db_path,
+            "WTF_CSRF_ENABLED": False,
             "SECRET_KEY": "test-source",
         }
     )

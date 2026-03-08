@@ -11,6 +11,7 @@
   {% endfor %}
 
   <form method="POST" class="post-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <label>name</label>
     <input type="text" name="name" 
            placeholder="e.g. python, devops, databases" 

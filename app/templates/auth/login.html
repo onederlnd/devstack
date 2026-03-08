@@ -4,6 +4,7 @@
 <div class="auth-form">
   <h1>welcome back</h1>
   <form method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <input name="username" placeholder="username" required>
     <input name="password" type="password" placeholder="password" required>
     <button type="submit" class="btn-submit">log in</button>

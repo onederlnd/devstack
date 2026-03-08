@@ -35,11 +35,13 @@
     <div class="post-card">
       <div class="vote-col">
         <form method="POST" action="/posts/{{ post.id }}/vote">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <input type="hidden" name="value" value="1">
           <button class="vote-btn up" title="upvote">▲</button>
         </form>
         <span class="vote-count">{{ post.votes }}</span>
         <form method="POST" action="/posts/{{ post.id }}/vote">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <input type="hidden" name="value" value="-1">
           <button class="vote-btn down" title="downvote">▼</button>
         </form>

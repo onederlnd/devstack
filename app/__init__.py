@@ -2,8 +2,10 @@ import os
 from flask import Flask, render_template
 from dotenv import load_dotenv
 from datetime import datetime, timezone
+from flask_wtf.csrf import CSRFProtect
 
 load_dotenv()
+csrf = CSRFProtect()
 
 
 def time_ago(dt_str):
@@ -42,6 +44,9 @@ def create_app(config=None):
     app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "2ejfof2jf2ojwfxasf")
     app.config["DATABASE_URL"] = os.environ.get("DATABASE_URL", "devstack.db")
     app.config["TESTING"] = False
+    app.config["WTF_CSRF_SECRET_KEY"] = os.environ.get(
+        "WTF_CSRF_SECRET_KEY", "dev-csrf-secret"
+    )
 
     if config:
         app.config.update(config)
@@ -50,6 +55,7 @@ def create_app(config=None):
     from app.models import init_db
 
     init_db(app)
+    csrf.init_app(app)
 
     # import blueprints
     from app.routes.auth import auth_bp
@@ -73,6 +79,8 @@ def create_app(config=None):
 
     # register other
     app.jinja_env.filters["time_ago"] = time_ago
+
+    csrf.exempt(api_bp)
 
     @app.context_processor
     def inject_unread_count():

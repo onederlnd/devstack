@@ -21,6 +21,7 @@
         {% if following %}
           onsubmit="return confirm('unfollow {{ profile_user.username }}?')"
         {% endif %}>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button class="btn-follow {% if following %}btn-unfollow{% endif %}">
           {{ 'unfollow' if following else 'follow' }}
         </button>
