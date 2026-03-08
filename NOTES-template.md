@@ -5,12 +5,12 @@
 
 ### What needs to change?
 - [ ] Database:
-- [ ] Utility:
 - [ ] Model:
 - [ ] Route:
 - [ ] Template:
 - [ ] Tests: 
 
+- [ ] is this a utility?: delete if not
 ### Edge cases
 
 

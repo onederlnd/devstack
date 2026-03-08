@@ -82,8 +82,67 @@ def create_app(config=None):
             return {"unread_count": get_unread_count(session["user_id"])}
         return {"unread_count": 0}
 
+    @app.errorhandler(400)
+    def bad_request(e):
+        return render_template(
+            "error.html",
+            code=400,
+            name="Bad Request",
+            message="the server could not understand the request due to invalid syntax.",
+        ), 400
+
+    @app.errorhandler(401)
+    def unauthorized(e):
+        return render_template(
+            "error.html",
+            code=401,
+            name="Unauthorized",
+            message="you must be logged in to access this resource.",
+        ), 401
+
+    @app.errorhandler(403)
+    def forbidden(e):
+        return render_template(
+            "error.html",
+            code=403,
+            name="Forbidden",
+            message="you don't have permission to access this resource.",
+        ), 403
+
+    @app.errorhandler(404)
+    def not_found(e):
+        return render_template(
+            "error.html",
+            code=404,
+            name="Not Found",
+            message="the requested resource could not be found on this server.",
+        ), 404
+
+    @app.errorhandler(405)
+    def method_not_allowed(e):
+        return render_template(
+            "error.html",
+            code=405,
+            name="Method Not Allowed",
+            message="the server is rate limited due to too many requests from your IP. Please try again later.",
+        ), 405
+
     @app.errorhandler(429)
     def rate_limited(e):
-        return render_template("429.html"), 429
+        return render_template(
+            "error.html",
+            code=429,
+            name="Rate Limited",
+            message="the server is rate limited due to too many requests from your IP. Please try again later.",
+        ), 429
+
+    @app.errorhandler(500)
+    def internal_error(e):
+        return render_template(
+            "error.html",
+            code=500,
+            name="Internal Server Error",
+            message="the server encountered an internal error and was unable to complete your request.",
+        ), 500
 
     return app
