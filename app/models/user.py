@@ -1,13 +1,17 @@
 # app/models/user.py
 
 import sqlite3
-import hashlib
+import bcrypt
 from app.models import get_db
+from flask import current_app
 
 
 def create_user(username, password, bio=""):
     db = get_db()
-    password_hash = hashlib.sha256(password.encode()).hexdigest()
+    rounds = current_app.config.get("BCRYPT_ROUNDS", 12)
+    password_hash = bcrypt.hashpw(
+        password.encode(), bcrypt.gensalt(rounds=rounds)
+    ).decode()
     try:
         db.execute(
             "INSERT INTO users (username, password_hash, bio) VALUES (?, ?, ?)",
@@ -33,8 +37,7 @@ def check_password(username, password):
     user = get_user_by_username(username)
     if not user:
         return None
-    password_hash = hashlib.sha256(password.encode()).hexdigest()
-    if user["password_hash"] == password_hash:
+    if bcrypt.checkpw(password.encode(), user["password_hash"].encode()):
         return user
     return None
 
@@ -45,7 +48,7 @@ def follow_user(follower_id, followed_id):
     db = get_db()
     try:
         db.execute(
-            "INSERT INTO follows (follower_id, followed_id) VALUES (?, ?, ?)",
+            "INSERT INTO follows (follower_id, followed_id) VALUES (?, ?)",
             (follower_id, followed_id),
         )
         db.connect()
@@ -79,7 +82,7 @@ def get_followers_count(user_id):
     """Returns number of users following user_id"""
     db = get_db()
     return db.execute(
-        "SELECT COUNT(*) FROM follows WHERE followed_id=?", (user_id,)
+        "SELECT COUNT(*) FROM follows WHERE follower_id=?", (user_id,)
     ).fetchone()[0]
 
 

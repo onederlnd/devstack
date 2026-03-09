@@ -2,7 +2,7 @@
 
 import sys
 import os
-import hashlib
+import bcrypt
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
@@ -37,6 +37,7 @@ def menu():
     print("13. delete topic")
     print("--- db ---")
     print("14. reset database")
+    print("15. auto-seed test data")
     print("0.  exit")
     return input("\n> ").strip()
 
@@ -89,10 +90,10 @@ def create_user(db):
     if existing:
         print(f"user '{username}' already exists.")
         return
-    hashed = hashlib.sha256(password.encode()).hexdigest()
+    password_hash = bcrypt.hashpw(password.encode(), bcrypt.gensalt(rounds=12)).decode()
     db.execute(
         "INSERT INTO users (username, password_hash, bio) VALUES (?,?,?)",
-        (username, hashed, bio),
+        (username, password_hash, bio),
     )
     db.commit()
     print(f"user '{username}' created.")
@@ -426,6 +427,182 @@ def reset_database(db):
     print("database reset.")
 
 
+def auto_seed(db):
+    confirm = input("seed test users, posts, follows, votes, and replies? (y/n): ")
+    if confirm.lower() != "y":
+        print("cancelled.")
+        return
+
+    # --- users ---
+    seed_users = [
+        ("rchristenhusz", "pass123", "Just a dev who loves Python and travel."),
+        ("testuser", "pass123", "Here to test things and cause chaos."),
+    ]
+
+    user_ids = {}
+    for username, password, bio in seed_users:
+        existing = db.execute(
+            "SELECT id FROM users WHERE username=?", (username,)
+        ).fetchone()
+        if existing:
+            user_ids[username] = existing["id"]
+            print(f"  user '{username}' already exists, skipping.")
+        else:
+            password_hash = bcrypt.hashpw(
+                password.encode(), bcrypt.gensalt(rounds=12)
+            ).decode()
+            db.execute(
+                "INSERT INTO users (username, password_hash, bio) VALUES (?,?,?)",
+                (username, password_hash, bio),
+            )
+            db.commit()
+            user_ids[username] = db.execute("SELECT last_insert_rowid()").fetchone()[0]
+            print(f"  created user '{username}'.")
+
+    rc_id = user_ids["rchristenhusz"]
+    test_id = user_ids["testuser"]
+
+    # --- mutual follows ---
+    for follower, followed in [(rc_id, test_id), (test_id, rc_id)]:
+        exists = db.execute(
+            "SELECT 1 FROM follows WHERE follower_id=? AND followed_id=?",
+            (follower, followed),
+        ).fetchone()
+        if not exists:
+            db.execute(
+                "INSERT INTO follows (follower_id, followed_id) VALUES (?,?)",
+                (follower, followed),
+            )
+    db.commit()
+    print("  mutual follows set.")
+
+    # --- topics ---
+    topic_ids = {}
+    for topic_name, description in [
+        ("python", "Anything Python related."),
+        ("vacation", "Travel, trips, and time off."),
+    ]:
+        row = db.execute("SELECT id FROM topics WHERE name=?", (topic_name,)).fetchone()
+        if row:
+            topic_ids[topic_name] = row["id"]
+            print(f"  topic '{topic_name}' already exists, skipping.")
+        else:
+            db.execute(
+                "INSERT INTO topics (name, description) VALUES (?,?)",
+                (topic_name, description),
+            )
+            db.commit()
+            topic_ids[topic_name] = db.execute("SELECT last_insert_rowid()").fetchone()[
+                0
+            ]
+            print(f"  created topic '{topic_name}'.")
+
+    # --- posts ---
+    seed_posts = [
+        (
+            rc_id,
+            "Getting started with Python decorators",
+            "Decorators are one of Python's most powerful features. "
+            "Here's a quick breakdown of how they work and when to use them.",
+            "python",
+        ),
+        (
+            rc_id,
+            "My trip to Portugal",
+            "Spent two weeks in Lisbon and Porto. The food, the trams, the views "
+            "— absolutely worth it. Here are my highlights.",
+            "vacation",
+        ),
+        (
+            test_id,
+            "Python virtual environments explained",
+            "If you're not using venv or pyenv yet, you're making your life harder "
+            "than it needs to be. Let me walk you through it.",
+            "python",
+        ),
+        (
+            test_id,
+            "Best budget destinations in Southeast Asia",
+            "Thailand, Vietnam, and Cambodia are all incredible and surprisingly "
+            "affordable. Here's what I wish I'd known before going.",
+            "vacation",
+        ),
+    ]
+
+    post_ids = []
+    for user_id, title, body, topic in seed_posts:
+        existing = db.execute(
+            "SELECT id FROM posts WHERE user_id=? AND title=?", (user_id, title)
+        ).fetchone()
+        if existing:
+            post_ids.append(existing["id"])
+            print(f"  post '{title[:45]}' already exists, skipping.")
+        else:
+            db.execute(
+                "INSERT INTO posts (user_id, title, body, topic_id) VALUES (?,?,?,?)",
+                (user_id, title, body, topic_ids[topic]),
+            )
+            db.commit()
+            pid = db.execute("SELECT last_insert_rowid()").fetchone()[0]
+            post_ids.append(pid)
+            print(f"  created post '{title[:45]}'.")
+
+    rc_posts = [post_ids[0], post_ids[1]]  # rchristehusz's posts
+    test_posts = [post_ids[2], post_ids[3]]  # testuser's posts
+
+    # --- cross-votes (each user upvotes the other's posts) ---
+    for voter_id, targets in [(test_id, rc_posts), (rc_id, test_posts)]:
+        for pid in targets:
+            exists = db.execute(
+                "SELECT 1 FROM votes WHERE user_id=? AND post_id=?", (voter_id, pid)
+            ).fetchone()
+            if not exists:
+                db.execute(
+                    "INSERT INTO votes (user_id, post_id, value) VALUES (?,?,1)",
+                    (voter_id, pid),
+                )
+    db.commit()
+    print("  votes added.")
+
+    # --- cross-replies (each user replies to the other's posts) ---
+    replies = [
+        (
+            test_id,
+            rc_posts[0],
+            "Great write-up! Decorators finally clicked for me after reading this.",
+        ),
+        (
+            test_id,
+            rc_posts[1],
+            "Portugal is on my list! Did you make it down to the Algarve coast?",
+        ),
+        (
+            rc_id,
+            test_posts[0],
+            "Pyenv changed my workflow completely. Solid recommendation.",
+        ),
+        (
+            rc_id,
+            test_posts[1],
+            "Southeast Asia is incredible. Vietnam was my favourite stop by far.",
+        ),
+    ]
+
+    for user_id, parent_id, body in replies:
+        exists = db.execute(
+            "SELECT 1 FROM posts WHERE user_id=? AND parent_id=? AND body=?",
+            (user_id, parent_id, body),
+        ).fetchone()
+        if not exists:
+            db.execute(
+                "INSERT INTO posts (user_id, title, body, parent_id) VALUES (?,?,?,?)",
+                (user_id, "", body, parent_id),
+            )
+    db.commit()
+    print("  replies added.")
+    print("\nauto-seed complete.")
+
+
 with app.app_context():
     db = get_db()
     while True:
@@ -458,6 +635,8 @@ with app.app_context():
             delete_topic(db)
         elif choice == "14":
             reset_database(db)
+        elif choice == "15":
+            auto_seed(db)
         elif choice == "0":
             print("bye.")
             break

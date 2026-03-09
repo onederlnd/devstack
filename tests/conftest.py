@@ -24,6 +24,7 @@ def app():
             "DATABASE_URL": db_path,
             "WTF_CSRF_ENABLED": False,
             "SECRET_KEY": "test-source",
+            "BCRYPT_ROUNDS": 4,
         }
     )
     yield test_app
