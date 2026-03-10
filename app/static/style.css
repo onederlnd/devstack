@@ -808,3 +808,30 @@ a:hover { text-decoration: underline; }
   font-size: 11px;
   color: var(--muted);
 }
+
+/* SETTINGS */
+.settings-section {
+  margin-bottom: 32px;
+  padding-bottom: 32px;
+  border-bottom: 1px solid var(--border);
+}
+
+.settings-section:last-child {
+  border-bottom: none;
+}
+
+.follow-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.follow-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}

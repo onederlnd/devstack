@@ -33,7 +33,7 @@ BODY_MAX = 10000
 
 @posts_bp.route("/new", methods=["GET", "POST"])
 @login_required
-@rate_limit(max_requests=10, window_seconds=60)  # limit to  posts per minute
+@rate_limit(max_requests=10, window_seconds=60)
 def new_post():
     topics = get_all_topics()
     if request.method == "POST":
@@ -61,9 +61,6 @@ def new_post():
 
 @posts_bp.route("/<int:post_id>")
 @login_required
-@rate_limit(
-    max_requests=10, window_seconds=60
-)  # limit to 10 views per minute to prevent abuse
 def view_post(post_id):
     post = get_post(post_id)
     if not post:
@@ -78,7 +75,6 @@ def view_post(post_id):
 
 @posts_bp.route("/<int:post_id>/edit", methods=["GET", "POST"])
 @login_required
-@rate_limit(max_requests=10, window_seconds=60)
 def edit_post(post_id):
     post = get_post(post_id)
     if not post:
@@ -106,7 +102,6 @@ def edit_post(post_id):
 
 @posts_bp.route("/<int:post_id>/delete", methods=["POST"])
 @login_required
-@rate_limit(max_requests=10, window_seconds=60)
 def delete(post_id):
     post = get_post(post_id)
     if not post:

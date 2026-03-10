@@ -33,6 +33,9 @@ def get_user_by_id(user_id):
     return db.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
 
 
+# --- password
+
+
 def check_password(username, password):
     user = get_user_by_username(username)
     if not user:
@@ -40,6 +43,19 @@ def check_password(username, password):
     if bcrypt.checkpw(password.encode(), user["password_hash"].encode()):
         return user
     return None
+
+
+def update_user_password(user_id, new_password):
+    """Update a user's password with bcrypt hash"""
+    from flask import current_app
+
+    rounds = current_app.config.get("BCRYPT_ROUNDS", 12)
+    password_hash = bcrypt.hashpw(
+        new_password.encode(), bcrypt.gensalt(rounds=rounds)
+    ).decode()
+    db = get_db()
+    db.execute("UPDATE users SET password_hash=? WHERE id=?", (password_hash, user_id))
+    db.commit()
 
 
 # --- following
@@ -92,3 +108,40 @@ def get_following_count(user_id):
     return db.execute(
         "SELECT COUNT(*) FROM follows WHERE followed_id=?", (user_id,)
     ).fetchone()[0]
+
+
+# --- update bio
+def update_user_bio(user_id, bio):
+    db = get_db()
+    db.execute("UPDATE users SET bio=? WHERE id=?", (bio, user_id))
+    db.commit()
+
+
+def get_db_followers(user_id):
+    """Return list of users follow user_id"""
+    db = get_db()
+    return db.execute(
+        """
+        SELECT users.id, users.username, users.bio
+                      FROM follows
+                      JOIN users ON follows.follower_id = users.id
+                      WHERE follows.followed_id = ?
+                      ORDER BY users.username
+                      """,
+        (user_id,),
+    ).fetchall()
+
+
+def get_db_following(user_id):
+    """Return list of users that user_id is following"""
+    db = get_db()
+    return db.execute(
+        """
+                      SELECT users.id, users.username, users.bio
+                      FROM follows
+                      JOIN users ON follows.followed_id = users.id
+                      WHERE follows.follower_id = ?
+                      ORDER BY users.username
+                      """,
+        (user_id,),
+    ).fetchall()

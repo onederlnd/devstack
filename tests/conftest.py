@@ -43,13 +43,13 @@ def auth_client(app):
     client = app.test_client()
     client.post(
         "/auth/register",
-        data={"username": "testuser", "password": "testpass123", "bio": "test bio"},
+        data={"username": "testuser", "password": "pass123", "bio": "test bio"},
     )
     client.post(
         "/auth/login",
         data={
             "username": "testuser",
-            "password": "testpass123",
+            "password": "pass123",
         },
     )
     return client
