@@ -1,20 +1,21 @@
 {% extends "base.html" %}
-{% block title %}search — devstack{% endblock %}
+{% block title %}Search — SparK{% endblock %}
 
 {% block content %}
+
 <div class="search-header">
+  <h1 class="feed-title" style="margin-bottom:16px">Search</h1>
   <form method="GET" action="/search" class="search-form">
     <input type="text" name="q" value="{{ query }}"
-           placeholder="search stacks and topics..."
+           placeholder="Search posts and topics..."
            autofocus class="search-input">
-    <!-- tabs switch between searching posts and topics -->
     <div class="search-tabs">
       <a href="/search?q={{ query }}&type=posts"
-         class="search-tab {% if search_type == 'posts' %}active{% endif %}">posts</a>
+         class="search-tab {% if search_type == 'posts' %}active{% endif %}">Posts</a>
       <a href="/search?q={{ query }}&type=topics"
-         class="search-tab {% if search_type == 'topics' %}active{% endif %}">topics</a>
+         class="search-tab {% if search_type == 'topics' %}active{% endif %}">Topics</a>
     </div>
-    <button type="submit" class="btn-submit">search</button>
+    <button type="submit" class="btn-submit">Search</button>
   </form>
 </div>
 
@@ -30,9 +31,9 @@
           <div class="post-body">
             <div class="post-meta">
               {% if post.topic_name %}
-                <a href="/t/{{ post.topic_name }}" class="post-topic">/t/{{ post.topic_name }}</a>
+                <a href="/t/{{ post.topic_name }}" class="post-topic">{{ post.topic_name }}</a>
               {% endif %}
-              <span class="post-author">@{{ post.username }}</span>
+              <span class="post-author">{{ post.username }}</span>
             </div>
             <a href="/posts/{{ post.id }}" class="post-title">{{ post.title }}</a>
             <p class="post-preview">{{ post.body | truncate(140) }}</p>
@@ -40,36 +41,41 @@
         </div>
         {% endfor %}
       </div>
-      <!-- pagination reuses same pattern as feed -->
       <div class="pagination">
         {% if page > 1 %}
-          <a href="/search?q={{ query }}&type=posts&page={{ page - 1 }}" class="page-btn">← prev</a>
+          <a href="/search?q={{ query }}&type=posts&page={{ page - 1 }}" class="page-btn">← Prev</a>
         {% endif %}
-        <span class="page-num">page {{ page }}</span>
+        <span class="page-num">Page {{ page }}</span>
         {% if has_next %}
-          <a href="/search?q={{ query }}&type=posts&page={{ page + 1 }}" class="page-btn">next →</a>
+          <a href="/search?q={{ query }}&type=posts&page={{ page + 1 }}" class="page-btn">Next →</a>
         {% endif %}
       </div>
     {% else %}
-      <div class="empty-state">no posts found for "{{ query }}"</div>
+      <div class="empty-state">
+        <p>no posts found</p>
+      </div>
     {% endif %}
-
   {% else %}
     {% if topics %}
       <div class="topics-grid">
         {% for topic in topics %}
         <a href="/t/{{ topic.name }}" class="topic-card">
-          <div class="topic-card-name">/t/{{ topic.name }}</div>
-          <div class="topic-card-desc">{{ topic.description or "no description" }}</div>
-          <div class="topic-card-count">{{ topic.post_count }} stacks</div>
+          <div class="topic-card-name">{{ topic.name }}</div>
+          <div class="topic-card-desc">{{ topic.description or "No description yet" }}</div>
+          <div class="topic-card-count">{{ topic.post_count }} posts</div>
         </a>
         {% endfor %}
       </div>
     {% else %}
-      <div class="empty-state">no topics found for "{{ query }}"</div>
+      <div class="empty-state">
+        <p>No topics found for "{{ query }}"</p>
+      </div>
     {% endif %}
   {% endif %}
 {% else %}
-  <div class="empty-state">enter a search term above</div>
+  <div class="empty-state">
+    <p>enter a search term</p>
+  </div>
 {% endif %}
+
 {% endblock %}

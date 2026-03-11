@@ -3,38 +3,54 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}Devstack{% endblock %}</title>
+  <title>{% block title %}SparK{% endblock %}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Fraunces:wght@400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=5">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
-
 </head>
 <body>
+
   <nav class="topbar">
-    <a href="/" class="logo">⬡ devstack</a>
-  <div class="nav-search">
-    <form method="GET" action="/search">
-      <input type="text" name="q" placeholder="search..." class="nav-search-input">
-    </form>
-  </div>
-  <div class="nav-actions">
-    {% if session.username %}
-      <a href="/topics" class="nav-link">topics</a>
-      <a href="/posts/new" class="btn-new">+ new stack</a>
-      <a href="/profile/{{ session.username }}" 
-        class="nav-link {% if '/profile/' + session.username in request.path %}active{% endif %}">
-        {{ session.username }}
-      </a>
-      <a href="/auth/logout" class="nav-link">logout</a>
-    {% else %}
-      <a href="/auth/login" class="nav-link {% if request.path == '/auth/login' %}active{% endif %}">login</a>
-      <a href="/auth/register" class="nav-link {% if request.path == '/auth/register' %}active{% endif %}">register</a>
-    {% endif %}
-  </div>
+    <a href="/" class="nav-logo">
+      <div class="nav-hex">⚡</div>
+      SparK
+    </a>
+    <div class="nav-search">
+      <form method="GET" action="/search">
+        <span class="search-icon">🔍</span>
+        <input type="text" name="q" placeholder="Search..." class="nav-search-input"
+          value="{{ request.args.get('q', '') }}">
+      </form>
+    </div>
+    <div class="nav-actions">
+      {% if session.username %}
+        <a href="/topics" class="nav-link {% if request.path == '/topics' %}active{% endif %}">Topics</a>
+        <a href="/posts/new" class="btn btn-primary">+ New Post</a>
+        <a href="/notifications/" class="nav-bell">
+          🔔
+          {% if unread_count > 0 %}
+            <span class="nav-badge">{{ unread_count }}</span>
+          {% endif %}
+        </a>
+        <a href="/profile/{{ session.username }}" class="nav-avatar" title="{{ session.username }}">
+          {{ session.username[:2].upper() }}
+        </a>
+      {% else %}
+        <a href="/auth/login" class="btn btn-ghost {% if request.path == '/auth/login' %}active{% endif %}">Sign In</a>
+        <a href="/auth/register" class="btn btn-primary">Join Free ✦</a>
+      {% endif %}
+    </div>
   </nav>
-<div class="layout">
+
+{% set has_left = self.left_sidebar()|trim %}
+  {% set has_right = self.right_sidebar()|trim %}
+
+  {% if has_left or has_right %}
+  <div class="app-layout">
+    <aside class="sidebar">
+      {% block left_sidebar %}{% endblock %}
+    </aside>
     <main class="main-content">
       {% with messages = get_flashed_messages(with_categories=true) %}
         {% for category, message in messages %}
@@ -43,39 +59,58 @@
       {% endwith %}
       {% block content %}{% endblock %}
     </main>
+    <aside class="right-sidebar">
+      {% block right_sidebar %}{% endblock %}
+    </aside>
+  </div>
+  {% else %}
+  <div class="layout">
+    <main class="main-content">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+          <div class="flash flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endwith %}
+      {{ self.content() }}
+    </main>
+  </div>
+  {% endif %}
+
+  <div class="toast" id="toast">
+    <div class="toast-icon">🔔</div>
+    <div class="toast-body">
+      <div class="toast-title">New notification</div>
+      <div class="toast-message" id="toast-message"></div>
+    </div>
   </div>
 
-<script src="{{ url_for('static', filename='app.js') }}"></script>
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
 
   {% if session.username %}
   <script>
     const socket = io();
-
-    socket.on("connect", () => {
-      console.log("socket connected");
-    });
-
+    socket.on("connect", () => { console.log("[spark] socket connected"); });
     socket.on("notification", (data) => {
-      // find the badge element
       let badge = document.querySelector(".nav-badge");
-
       if (badge) {
-        // increment existing badge
         badge.textContent = parseInt(badge.textContent) + 1;
       } else {
-        // create badge if it doesn't exist
         const bell = document.querySelector(".nav-bell");
         if (bell) {
-          const newBadge = document.createElement("span");
-          newBadge.className = "nav-badge";
-          newBadge.textContent = "1";
-          bell.appendChild(newBadge);
+          const b = document.createElement("span");
+          b.className = "nav-badge";
+          b.textContent = "1";
+          bell.appendChild(b);
         }
       }
+      const toast = document.getElementById("toast");
+      const toastMsg = document.getElementById("toast-message");
+      if (toastMsg) toastMsg.textContent = data.message || "You have a new notification";
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 3500);
     });
   </script>
   {% endif %}
 
-<script src="{{ url_for('static', filename='app.js') }}"></script>
 </body>
 </html>

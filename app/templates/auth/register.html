@@ -1,14 +1,17 @@
 {% extends "base.html" %}
-{% block title %}register — devstack{% endblock %}
+{% block title %}Join SparK{% endblock %}
 {% block content %}
+
 <div class="auth-form">
-  <h1>join devstack</h1>
+  <h1>Join SparK</h1>
+  <p class="form-subtitle">A safe community for students and educators</p>
   <form method="POST">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <input name="username" placeholder="username" required>
-    <input name="password" type="password" placeholder="password" required>
-    <button type="submit" class="btn-submit">create account</button>
+    <input name="username" placeholder="Choose a username" required autocomplete="username">
+    <input name="password" type="password" placeholder="Create a password" required autocomplete="new-password">
+    <button type="submit" class="btn-submit">Create Account ✦</button>
   </form>
-  <a href="/auth/login">already have an account? log in →</a>
+  <a href="/auth/login">Already have an account? Sign in →</a>
 </div>
+
 {% endblock %}

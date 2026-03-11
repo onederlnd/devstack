@@ -47,6 +47,7 @@ def create_app(config=None):
     app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "2ejfof2jf2ojwfxasf")
     app.config["DATABASE_URL"] = os.environ.get("DATABASE_URL", "devstack.db")
     app.config["TESTING"] = False
+    app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 0
     app.config["WTF_CSRF_SECRET_KEY"] = os.environ.get(
         "WTF_CSRF_SECRET_KEY", "dev-csrf-secret"
     )

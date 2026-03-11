@@ -1,7 +1,7 @@
 def test_view_topics(auth_client):
     response = auth_client.get("/topics")
     assert response.status_code == 200
-    assert b"all topics" in response.data
+    assert b"All Topics" in response.data
 
 
 def test_create_topic(auth_client):

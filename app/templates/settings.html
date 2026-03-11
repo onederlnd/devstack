@@ -1,93 +1,81 @@
 {% extends "base.html" %}
-{% block title %}settings — devstack{% endblock %}
+{% block title %}Settings — SparK{% endblock %}
 
 {% block content %}
+
 <div class="form-page">
-  <h1 class="form-title">settings</h1>
+  <h1 class="form-title">Settings</h1>
+  <p class="form-subtitle">Manage your profile and account</p>
 
-  <!-- PROFILE SECTION -->
   <div class="settings-section">
-    <h2 class="section-heading">profile</h2>
-
-    <form method="POST" action="/profile/settings/bio">
+    <h2 class="section-heading">Profile</h2>
+    <form method="POST" action="/profile/settings/bio" class="post-form">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-      <label class="post-form" for="bio">bio</label>
-      <textarea
-        name="bio"
-        id="bio"
-        class="post-form"
-        rows="3"
-        placeholder="tell us about yourself..."
-      >{{ user.bio or '' }}</textarea>
-      <div class="form-actions" style="margin-top: 8px;">
-        <button type="submit" class="btn-submit">save bio</button>
+      <label for="bio">Bio</label>
+      <textarea name="bio" id="bio" rows="3"
+        placeholder="Tell us about yourself...">{{ user.bio or '' }}</textarea>
+      <div class="form-actions">
+        <button type="submit" class="btn-submit">Save Bio</button>
       </div>
     </form>
   </div>
 
-  <!-- SECURITY SECTION -->
   <div class="settings-section">
-    <h2 class="section-heading">security</h2>
-
-    <form method="POST" action="/profile/settings/password">
+    <h2 class="section-heading">Security</h2>
+    <form method="POST" action="/profile/settings/password" class="post-form">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-      <div class="post-form">
-        <label for="current_password">current password</label>
-        <input
-          type="password"
-          name="current_password"
-          id="current_password"
-          placeholder="current password"
-        >
-        <label for="new_password">new password</label>
-        <input
-          type="password"
-          name="new_password"
-          id="new_password"
-          placeholder="new password"
-        >
-      </div>
-      <div class="form-actions" style="margin-top: 8px;">
-        <button type="submit" class="btn-submit">change password</button>
+      <label for="current_password">Current Password</label>
+      <input type="password" name="current_password" id="current_password"
+        placeholder="Current password">
+      <label for="new_password">New Password</label>
+      <input type="password" name="new_password" id="new_password"
+        placeholder="New password">
+      <div class="form-actions">
+        <button type="submit" class="btn-submit">Change Password</button>
       </div>
     </form>
   </div>
 
-  <!-- FOLLOWERS SECTION -->
   <div class="settings-section">
-    <h2 class="section-heading">followers</h2>
-    {% if user.followers %}
+    <h2 class="section-heading">Followers</h2>
+    {% if followers %}
       <div class="follow-list">
         {% for f in followers %}
         <div class="follow-item">
-          <a href="/profile/{{ f.username }}" class="nav-link">{{ f.username }}</a>
+          <div class="nav-avatar" style="width:32px;height:32px;font-size:0.75rem;display:inline-flex">
+            {{ f.username[:2].upper() }}
+          </div>
+          <a href="/profile/{{ f.username }}" class="post-author" style="flex:1">{{ f.username }}</a>
         </div>
         {% endfor %}
       </div>
     {% else %}
-      <p class="form-subtitle">no followers yet.</p>
+      <p class="form-subtitle">No followers yet.</p>
     {% endif %}
   </div>
 
-  <!-- FOLLOWING SECTION -->
   <div class="settings-section">
-    <h2 class="section-heading">following</h2>
+    <h2 class="section-heading">Following</h2>
     {% if following %}
       <div class="follow-list">
         {% for f in following %}
         <div class="follow-item">
-          <a href="/profile/{{ f.username }}" class="nav-link">{{ f.username }}</a>
-          <form method="POST" action="/profile/{{ f.username }}/follow" style="display:inline;">
+          <div class="nav-avatar" style="width:32px;height:32px;font-size:0.75rem;display:inline-flex">
+            {{ f.username[:2].upper() }}
+          </div>
+          <a href="/profile/{{ f.username }}" class="post-author" style="flex:1">{{ f.username }}</a>
+          <form method="POST" action="/profile/{{ f.username }}/follow">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <button class="btn-delete">unfollow</button>
+            <button class="btn-delete">Unfollow</button>
           </form>
         </div>
         {% endfor %}
       </div>
     {% else %}
-      <p class="form-subtitle">not following anyone yet.</p>
+      <p class="form-subtitle">Not following anyone yet.</p>
     {% endif %}
   </div>
 
 </div>
+
 {% endblock %}

@@ -1,31 +1,99 @@
 {% extends "base.html" %}
 {% block title %}
-  {% if active_topic %}
-    /t/{{ active_topic.name }} — devstack
+  {% if active_topic %}{{ active_topic.name }} — SparK
+  {% else %}Feed — SparK{% endif %}
+{% endblock %}
+
+{% block left_sidebar %}
+<div class="sidebar-title">Menu</div>
+<ul class="sidebar-nav">
+  <li><a href="/?feed=all" class="{% if feed_type == 'all' and not active_topic %}active{% endif %}">
+    <span class="icon">🏠</span> Home Feed
+  </a></li>
+  <li><a href="/?feed=following" class="{% if feed_type == 'following' %}active{% endif %}">
+    <span class="icon">👥</span> Following
+  </a></li>
+  <li><a href="/notifications/">
+    <span class="icon">🔔</span> Notifications
+    {% if unread_count > 0 %}
+      <span class="nav-badge" style="position:static;margin-left:auto">{{ unread_count }}</span>
+    {% endif %}
+  </a></li>
+  <li><a href="/profile/{{ session.username }}">
+    <span class="icon">👤</span> My Profile
+  </a></li>
+  <li><a href="/search?type=posts">
+    <span class="icon">🔍</span> Search
+  </a></li>
+  <li><a href="/topics">
+    <span class="icon">🏷️</span> All Topics
+  </a></li>
+</ul>
+
+<div class="sidebar-divider"></div>
+
+<div class="sidebar-title">Topics</div>
+<div class="sidebar-topics">
+  {% for t in topics %}
+    <a href="/t/{{ t.name }}" class="topic-pill {% if active_topic and active_topic.name == t.name %}active{% endif %}">
+      {{ t.name }}
+    </a>
+  {% endfor %}
+  <a href="/topics/new" class="topic-pill" style="background:transparent;border:1px dashed var(--border);color:var(--muted)">
+    + new
+  </a>
+</div>
+{% endblock %}
+
+{% block right_sidebar %}
+<div class="widget">
+  <div class="widget-title">🔥 Trending</div>
+  {% if trending %}
+    {% for post in trending %}
+    <div class="trending-item">
+      <div class="trending-num">{{ loop.index }}</div>
+      <div class="trending-info">
+        <a href="/posts/{{ post.id }}" class="trending-title">{{ post.title | truncate(60) }}</a>
+        <div class="trending-meta">
+          {{ post.reply_count }} replies{% if post.topic_name %} · {{ post.topic_name }}{% endif %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
   {% else %}
-    feed — devstack
+    <p style="font-size:0.82rem;color:var(--muted);font-weight:500">No trending posts yet.</p>
   {% endif %}
+</div>
+
+<div class="widget">
+  <div class="widget-title">✦ Share Something</div>
+  <p style="font-size:0.82rem;color:var(--muted);font-weight:500;margin-bottom:14px">
+    Got something worth sharing with your community?
+  </p>
+  <a href="/posts/new" class="btn btn-primary" style="width:100%;justify-content:center">
+    + New Post
+  </a>
+</div>
 {% endblock %}
 
 {% block content %}
+
 <div class="feed-header">
-  <h1 class="feed-title">
-    {% if active_topic %}
-      /t/{{ active_topic.name }}
-      <span class="feed-desc">{{ active_topic.description }}</span>
-    {% else %}
-      all stacks
+  <div>
+    <h1 class="feed-title">
+      {% if active_topic %}{{ active_topic.name }}
+      {% else %}Home Feed{% endif %}
+    </h1>
+    {% if active_topic and active_topic.description %}
+      <p class="feed-desc">{{ active_topic.description }}</p>
     {% endif %}
-  </h1>
-  <a href="/posts/new" class="btn-new">+ new stack</a>
+  </div>
 </div>
 
 {% if not active_topic %}
 <div class="feed-tabs">
-  <a href="/?feed=all"
-     class="feed-tab {% if feed_type == 'all' %}active{% endif %}">all</a>
-  <a href="/?feed=following"
-     class="feed-tab {% if feed_type == 'following' %}active{% endif %}">following</a>
+  <a href="/?feed=all" class="feed-tab {% if feed_type == 'all' %}active{% endif %}">For You</a>
+  <a href="/?feed=following" class="feed-tab {% if feed_type == 'following' %}active{% endif %}">Following</a>
 </div>
 {% endif %}
 
@@ -37,28 +105,28 @@
         <form method="POST" action="/posts/{{ post.id }}/vote">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <input type="hidden" name="value" value="1">
-          <button class="vote-btn up" title="upvote">▲</button>
+          <button class="vote-btn up" title="Upvote">▲</button>
         </form>
         <span class="vote-count">{{ post.votes }}</span>
         <form method="POST" action="/posts/{{ post.id }}/vote">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <input type="hidden" name="value" value="-1">
-          <button class="vote-btn down" title="downvote">▼</button>
+          <button class="vote-btn down" title="Downvote">▼</button>
         </form>
       </div>
       <div class="post-body">
         <div class="post-meta">
           {% if post.topic_name %}
-            <a href="/t/{{ post.topic_name }}" class="post-topic">/t/{{ post.topic_name }}</a>
+            <a href="/t/{{ post.topic_name }}" class="post-topic">{{ post.topic_name }}</a>
           {% endif %}
-          <span class="post-author">@{{ post.username }}</span>
-          <span class="post-time">{{ post.created_at | time_ago }}</span>
+          <span class="post-author">{{ post.username }}</span>
+          <span class="post-time">· {{ post.created_at | time_ago }}</span>
         </div>
         <a href="/posts/{{ post.id }}" class="post-title">{{ post.title }}</a>
         <p class="post-preview">{{ post.body | truncate(140) }}</p>
         <div class="post-footer">
           <a href="/posts/{{ post.id }}" class="reply-count">
-            {{ post.reply_count }} {{ 'reply' if post.reply_count == 1 else 'replies' }}
+            💬 {{ post.reply_count }} {{ 'reply' if post.reply_count == 1 else 'replies' }}
           </a>
         </div>
       </div>
@@ -69,19 +137,17 @@
   <div class="pagination">
     {% if page > 1 %}
       {% if active_topic %}
-        <a href="/t/{{ active_topic.name }}?page={{ page - 1 }}" class="page-btn">← prev</a>
+        <a href="/t/{{ active_topic.name }}?page={{ page - 1 }}" class="page-btn">← Prev</a>
       {% else %}
-        <a href="/?feed={{ feed_type }}&page={{ page - 1 }}" class="page-btn">← prev</a>
+        <a href="/?feed={{ feed_type }}&page={{ page - 1 }}" class="page-btn">← Prev</a>
       {% endif %}
     {% endif %}
-
-    <span class="page-num">page {{ page }}</span>
-
+    <span class="page-num">Page {{ page }}</span>
     {% if has_next %}
       {% if active_topic %}
-        <a href="/t/{{ active_topic.name }}?page={{ page + 1 }}" class="page-btn">next →</a>
+        <a href="/t/{{ active_topic.name }}?page={{ page + 1 }}" class="page-btn">Next →</a>
       {% else %}
-        <a href="/?feed={{ feed_type }}&page={{ page + 1 }}" class="page-btn">next →</a>
+        <a href="/?feed={{ feed_type }}&page={{ page + 1 }}" class="page-btn">Next →</a>
       {% endif %}
     {% endif %}
   </div>
@@ -89,12 +155,13 @@
 {% else %}
   <div class="empty-state">
     {% if feed_type == 'following' %}
-      <p>no posts from followed users yet.</p>
-      <a href="/?feed=all">browse all stacks →</a>
+      <p>no posts from followed users yet</p>
+      <a href="/?feed=all" class="btn btn-primary" style="margin-top:16px">Browse All Posts</a>
     {% else %}
-      <p>no stacks yet.</p>
-      <a href="/posts/new">be the first to post →</a>
+      <p>No posts yet. Be the first!</p>
+      <a href="/posts/new" class="btn btn-primary" style="margin-top:16px">Create First Post ✦</a>
     {% endif %}
   </div>
 {% endif %}
+
 {% endblock %}

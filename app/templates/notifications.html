@@ -1,13 +1,14 @@
 {% extends "base.html" %}
-{% block title %}notifications — devstack{% endblock %}
+{% block title %}Notifications — SparK{% endblock %}
 
 {% block content %}
+
 <div class="feed-header">
-  <h1 class="feed-title">notifications</h1>
+  <h1 class="feed-title">Notifications</h1>
   {% if notifications %}
     <form method="POST" action="/notifications/read">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-      <button class="btn-cancel">mark all read</button>
+      <button class="btn btn-ghost btn-sm">Mark All Read</button>
     </form>
   {% endif %}
 </div>
@@ -16,7 +17,7 @@
   <div class="notification-list">
     {% for n in notifications %}
     <a href="{{ n.link or '/' }}" class="notification-item {% if not n.is_read %}unread{% endif %}">
-      <div class="notification-type">[{{ n.type }}]</div>
+      <div class="notification-type">{{ n.type }}</div>
       <div class="notification-body">
         <div class="notification-message">{{ n.message }}</div>
         <div class="notification-time">{{ n.created_at | time_ago }}</div>
@@ -25,6 +26,9 @@
     {% endfor %}
   </div>
 {% else %}
-  <div class="empty-state">no notifications yet.</div>
+  <div class="empty-state">
+    <p>No notifications yet.</p>
+  </div>
 {% endif %}
+
 {% endblock %}

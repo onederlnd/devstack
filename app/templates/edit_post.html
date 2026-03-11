@@ -1,9 +1,11 @@
 {% extends "base.html" %}
-{% block title %}edit stack — devstack{% endblock %}
+{% block title %}Edit Post — SparK{% endblock %}
 
 {% block content %}
+
 <div class="form-page">
-  <h1 class="form-title">edit stack</h1>
+  <h1 class="form-title">Edit Post</h1>
+  <p class="form-subtitle">Make changes to your post below</p>
 
   {% if error %}
     <div class="flash flash-error">{{ error }}</div>
@@ -11,16 +13,15 @@
 
   <form method="POST" class="post-form">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <label>title</label>
+    <label>Title</label>
     <input type="text" name="title" value="{{ post.title }}" required>
-
-    <label>body</label>
+    <label>Body</label>
     <textarea name="body" rows="8" required>{{ post.body }}</textarea>
-
     <div class="form-actions">
-      <button type="submit" class="btn-submit">save changes</button>
-      <a href="/posts/{{ post.id }}" class="btn-cancel">cancel</a>
+      <button type="submit" class="btn-submit">Save Changes</button>
+      <a href="/posts/{{ post.id }}" class="btn-cancel">Cancel</a>
     </div>
   </form>
 </div>
+
 {% endblock %}

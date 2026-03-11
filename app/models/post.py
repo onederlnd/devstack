@@ -263,3 +263,25 @@ def get_following_feed(user_id, page=1):
 
     has_next = len(rows) > PER_PAGE
     return rows[:PER_PAGE], has_next
+
+
+def get_trending(limit=5):
+    """
+    TODO: Implement trending algorithm.
+    Currently returns most voted posts from last 7 days.
+    Future: weight by recency + votes + reply_count + time decay.
+    """
+    db = get_db()
+    return db.execute(
+        """
+        SELECT posts.*, users.username, topics.name as topic_name
+        FROM posts
+        JOIN users ON posts.user_id = users.id
+        LEFT JOIN topics ON posts.topic_id = topics.id
+        WHERE posts.parent_id IS NULL
+        AND posts.created_at >= datetime('now', '-7 days')
+        ORDER BY posts.votes DESC, posts.reply_count DESC
+        LIMIT ?
+        """,
+        (limit,),
+    ).fetchall()

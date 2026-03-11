@@ -1,39 +1,52 @@
 {% extends "base.html" %}
-{% block title %}@{{ profile_user.username }} — devstack{% endblock %}
+{% block title %}{{ profile_user.username }} — SparK{% endblock %}
 
 {% block content %}
+
 <div class="profile-header">
-  <div class="profile-avatar">{{ profile_user.username[0].upper() }}</div>
+  <div class="profile-banner"></div>
   <div class="profile-info">
-    <h1 class="profile-username">@{{ profile_user.username }}</h1>
-    {% if profile_user.bio %}
-      <p class="profile-bio">{{ profile_user.bio }}</p>
-    {% endif %}
-    <span class="profile-meta">joined {{ profile_user.created_at }}</span>
-
-    <div class="profile-stats">
-      <span>{{ followers_count }} followers</span>
-      <span>{{ following_count }} following</span>
+    <div class="profile-avatar">{{ profile_user.username[:2].upper() }}</div>
+    <div class="profile-details">
+      <h1 class="profile-username">{{ profile_user.username }}</h1>
+      {% if profile_user.bio %}
+        <p class="profile-bio">{{ profile_user.bio }}</p>
+      {% endif %}
+      <p class="profile-meta">Joined {{ profile_user.created_at | time_ago }}</p>
+      <div class="profile-stats">
+        <div class="profile-stat">
+          <div class="profile-stat-num">{{ posts | length }}</div>
+          <div class="profile-stat-label">Posts</div>
+        </div>
+        <div class="profile-stat">
+          <div class="profile-stat-num">{{ following_count }}</div>
+          <div class="profile-stat-label">Following</div>
+        </div>
+        <div class="profile-stat">
+          <div class="profile-stat-num">{{ followers_count }}</div>
+          <div class="profile-stat-label">Followers</div>
+        </div>
+      </div>
     </div>
-
-    {% if profile_user.id != session.user_id %}
-      <form method="POST" action="/profile/{{ profile_user.username }}/follow"
-        {% if following %}
-          onsubmit="return confirm('unfollow {{ profile_user.username }}?')"
-        {% endif %}>
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <button class="btn-follow {% if following %}btn-unfollow{% endif %}">
-          {{ 'unfollow' if following else 'follow' }}
-        </button>
-      </form>
-    {% endif %}
-
+    <div class="profile-actions">
+      {% if profile_user.id != session.user_id %}
+        <form method="POST" action="/profile/{{ profile_user.username }}/follow"
+          {% if following %}onsubmit="return confirm('Unfollow {{ profile_user.username }}?')"{% endif %}>
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="btn-follow {% if following %}btn-unfollow{% endif %}">
+            {{ 'Unfollow' if following else 'Follow ✦' }}
+          </button>
+        </form>
+      {% else %}
+        <a href="{{ url_for('settings.show_settings') }}" class="btn btn-ghost btn-sm">Edit Profile</a>
+      {% endif %}
+    </div>
   </div>
 </div>
 
 <div class="profile-sections">
   <div class="profile-section">
-    <h2 class="section-heading">stacks ({{ posts | length }})</h2>
+    <h2 class="section-heading">Posts ({{ posts | length }})</h2>
     {% if posts %}
       <div class="post-list">
         {% for post in posts %}
@@ -44,9 +57,9 @@
           <div class="post-body">
             <div class="post-meta">
               {% if post.topic_name %}
-                <a href="/t/{{ post.topic_name }}" class="post-topic">/t/{{ post.topic_name }}</a>
+                <a href="/t/{{ post.topic_name }}" class="post-topic">{{ post.topic_name }}</a>
               {% endif %}
-              <span class="post-time">{{ post.created_at }}</span>
+              <span class="post-time">{{ post.created_at | time_ago }}</span>
             </div>
             <a href="/posts/{{ post.id }}" class="post-title">{{ post.title }}</a>
           </div>
@@ -54,13 +67,13 @@
         {% endfor %}
       </div>
     {% else %}
-      <p class="empty-state">no stacks yet.</p>
+      <div class="empty-state"><p>No posts yet.</p></div>
     {% endif %}
   </div>
 
   {% if bookmarks %}
   <div class="profile-section">
-    <h2 class="section-heading">bookmarks ({{ bookmarks | length }})</h2>
+    <h2 class="section-heading">Bookmarks ({{ bookmarks | length }})</h2>
     <div class="post-list">
       {% for post in bookmarks %}
       <div class="post-card">
@@ -70,9 +83,9 @@
         <div class="post-body">
           <div class="post-meta">
             {% if post.topic_name %}
-              <a href="/t/{{ post.topic_name }}" class="post-topic">/t/{{ post.topic_name }}</a>
+              <a href="/t/{{ post.topic_name }}" class="post-topic">{{ post.topic_name }}</a>
             {% endif %}
-            <span class="post-author">@{{ post.username }}</span>
+            <span class="post-author">{{ post.username }}</span>
           </div>
           <a href="/posts/{{ post.id }}" class="post-title">{{ post.title }}</a>
         </div>
@@ -82,4 +95,5 @@
   </div>
   {% endif %}
 </div>
+
 {% endblock %}

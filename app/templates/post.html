@@ -1,62 +1,85 @@
 {% extends "base.html" %}
-{% block title %}{{ post.title }} — devstack{% endblock %}
+{% block title %}{{ post.title }} — SparK{% endblock %}
 
 {% block content %}
+
+<div class="breadcrumb">
+  <a href="/">← Feed</a>
+  {% if post.topic_name %}
+    <span>/</span>
+    <a href="/t/{{ post.topic_name }}">{{ post.topic_name }}</a>
+  {% endif %}
+  <span>/</span>
+  <span>{{ post.title | truncate(48) }}</span>
+</div>
+
 <div class="post-full">
   <div class="vote-col">
     <form method="POST" action="/posts/{{ post.id }}/vote">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <input type="hidden" name="value" value="1">
-      <button class="vote-btn up">▲</button>
+      <button class="vote-btn up" title="Upvote">▲</button>
     </form>
     <span class="vote-count">{{ post.votes }}</span>
     <form method="POST" action="/posts/{{ post.id }}/vote">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <input type="hidden" name="value" value="-1">
-      <button class="vote-btn down">▼</button>
+      <button class="vote-btn down" title="Downvote">▼</button>
     </form>
   </div>
+
   <div class="post-content">
     <div class="post-meta">
+      <div class="nav-avatar" style="width:32px;height:32px;font-size:0.75rem;display:inline-flex;flex-shrink:0">
+        {{ post.username[:2].upper() }}
+      </div>
+      <a href="/profile/{{ post.username }}" class="post-author">{{ post.username }}</a>
+      <span class="post-time">· {{ post.created_at | time_ago }}</span>
       {% if post.topic_name %}
-        <a href="/t/{{ post.topic_name }}" class="post-topic">/t/{{ post.topic_name }}</a>
+        <a href="/t/{{ post.topic_name }}" class="post-topic">{{ post.topic_name }}</a>
       {% endif %}
-      <span class="post-author">@{{ post.username }}</span>
-      <span class="post-time">{{ post.created_at }}</span>
     </div>
+
     <h1 class="post-title-full">{{ post.title }}</h1>
     <div class="post-body-full">{{ post.body }}</div>
+
     <div class="post-actions">
       <form method="POST" action="/posts/{{ post.id }}/bookmark">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <button class="btn-bookmark {% if bookmarked %}bookmarked{% endif %}">
-          {% if bookmarked %}⊗ bookmarked{% else %}⊕ bookmark{% endif %}
+          {% if bookmarked %}🔖 Saved{% else %}🔖 Save{% endif %}
         </button>
       </form>
-      <a href="/profile/{{ post.username }}" class="btn-profile">@{{ post.username }}</a>
       {% if session.user_id == post.user_id %}
-      <a href="/posts/{{ post.id }}/edit" class="btn-edit">edit</a>
-      <form method="POST" action="/posts/{{ post.id }}/delete"
-        onsubmit="return confirm('delete this stack?')">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <button class="btn-delete">delete</button>
-      </form>
+        <a href="/posts/{{ post.id }}/edit" class="btn-edit">Edit</a>
+        <form method="POST" action="/posts/{{ post.id }}/delete"
+          onsubmit="return confirm('Delete this post?')">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="btn-delete">Delete</button>
+        </form>
       {% endif %}
     </div>
-
   </div>
 </div>
 
 <div class="replies-section">
-  <h2 class="replies-heading">
-    {{ post.reply_count }} {{ 'reply' if post.reply_count == 1 else 'replies'}}
-  </h2>
+  <div class="replies-heading">
+    Replies
+    <span style="background:var(--sky);color:var(--blue);border-radius:50px;font-size:0.75rem;font-weight:800;padding:2px 10px">
+      {{ post.reply_count }}
+    </span>
+  </div>
 
-  <form method="POST" action="/posts/{{ post.id }}/reply" class="reply-form">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <textarea name="body" placeholder="write a reply..." rows="3" required></textarea>
-    <button type="submit" class="btn-submit">post reply</button>
-  </form>
+  <div class="reply-form">
+    <div class="compose-label">Share your thoughts</div>
+    <form method="POST" action="/posts/{{ post.id }}/reply">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <textarea name="body" placeholder="Write a helpful reply..." rows="3" required></textarea>
+      <div style="display:flex;justify-content:flex-end;margin-top:10px">
+        <button type="submit" class="btn-submit">Post Reply ✦</button>
+      </div>
+    </form>
+  </div>
 
   {% for reply in replies %}
   <div class="reply-card">
@@ -74,13 +97,17 @@
       </form>
     </div>
     <div class="reply-body">
-      <div class="post-meta">
-        <span class="post-author">@{{ reply.username }}</span>
-        <span class="post-time">{{ reply.created_at }}</span>
+      <div class="post-meta" style="margin-bottom:10px">
+        <div class="nav-avatar" style="width:28px;height:28px;font-size:0.7rem;display:inline-flex;flex-shrink:0">
+          {{ reply.username[:2].upper() }}
+        </div>
+        <a href="/profile/{{ reply.username }}" class="post-author">{{ reply.username }}</a>
+        <span class="post-time">· {{ reply.created_at | time_ago }}</span>
       </div>
-      <p>{{ reply.body }}</p>
+      <p class="reply-body">{{ reply.body }}</p>
     </div>
   </div>
   {% endfor %}
 </div>
+
 {% endblock %}
