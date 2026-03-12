@@ -8,14 +8,6 @@ from app.utils.brute_force import _lockouts
 
 
 @pytest.fixture(autouse=True)
-def reset_rate_limits():
-    """Reset the in-memory rate limit store before each test"""
-    _request_counts.clear()
-    yield
-    _request_counts.clear()
-
-
-@pytest.fixture(autouse=True)
 def reset_brute_force():
     from app.utils.brute_force import _failed_attempts, _clean_attempts
 
@@ -24,6 +16,14 @@ def reset_brute_force():
     yield
     _failed_attempts.clear()
     _lockouts.clear()
+
+
+@pytest.fixture(autouse=True)
+def reset_rate_limits():
+    """Reset the in-memory rate limit store before each test"""
+    _request_counts.clear()
+    yield
+    _request_counts.clear()
 
 
 @pytest.fixture(scope="function")
@@ -37,6 +37,7 @@ def app():
             "WTF_CSRF_ENABLED": False,
             "SECRET_KEY": "test-source",
             "BCRYPT_ROUNDS": 4,
+            "SESSION_TIMEOUT_MINUTES": 10,
         }
     )
     yield test_app
@@ -64,4 +65,5 @@ def auth_client(app):
             "password": "pass123",
         },
     )
+
     return client

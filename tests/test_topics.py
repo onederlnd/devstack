@@ -40,7 +40,6 @@ def test_create_topic_too_short(auth_client):
 
 def test_topic_feed(auth_client):
     auth_client.post("/topics/new", data={"name": "testfeed", "description": "test"})
-    from app.models.topic import get_topic_by_name
 
     response = auth_client.get("/t/testfeed")
     assert response.status_code == 200

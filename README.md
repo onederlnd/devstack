@@ -1,26 +1,24 @@
 # ⚡ SparK
 
-Where curiosity meets community. SparK is a safe, moderated platform for students,
-kids, and educators to learn, share, and grow together.
-Built with Flask, SQLite, and Docker.
+Where curiosity meets community. SparK is a safe, moderated platform for students, kids, and educators to learn, share, and grow together. Built with Flask, SQLite, and Docker.
 
 > Built for the classroom. Designed for kids. Trusted by educators.
+/
+---
 
 ## Vision
 
-Most social platforms are engineered for engagement at any cost. SparK is built
-around a different idea — that young people deserve a space where they can express
-themselves, ask questions, and connect with peers and teachers without being exposed
-to the dangers of the open internet.
+Most social platforms are engineered for engagement at any cost. SparK is built around a different idea — that young people deserve a space where they can express themselves, ask questions, and connect with peers and teachers without being exposed to the dangers of the open internet.
 
 Safety isn't a feature on SparK. It's the entire point.
+
+---
 
 ## Current Status
 
 **Phase 1 — Safety Core: in progress**
 
-The core social platform is built and functional. We are currently hardening the
-platform for real classroom use. SparK is not yet open to the public.
+The core social platform is built and functional. The classroom system is in active development. SparK is not yet open to the public.
 
 | Area | Status |
 |------|--------|
@@ -28,20 +26,33 @@ platform for real classroom use. SparK is not yet open to the public.
 | Authentication | ✅ Complete |
 | Input sanitization / XSS prevention | ✅ Complete |
 | Brute force protection | ✅ Complete |
-| Session timeout | ⬜ In Progress |
-| Report system | ⬜ Planned |
-| Content moderation queue | ⬜ Planned |
-| Closed beta (single classroom) | ⬜ Blocked on above |
+| UX polish (theme, mobile, BBCode preview) | ✅ Complete |
+| Session timeout | 🔲 In Progress |
+| Report system | 🔲 Planned |
+| Content moderation queue | 🔲 Planned |
+| Classroom system (lessons + assignments + grading) | 🔲 In Development |
+| Closed beta (single classroom) | 🔲 Blocked on above |
+
+---
 
 ## What's Built
 
 ### Social Platform
 - Post, reply, vote, and bookmark in topic channels
 - Follow other users and get a personalized feed
-- Full-text search across posts and users
+- Full-text search across posts and topics
 - Real-time notifications via WebSockets
 - Trending posts widget
 - Pagination
+- Dark and light theme
+
+### Classroom System *(in development)*
+- Teacher-owned classrooms with student enrollment via join code
+- Lesson pages with rich BBCode content
+- Assignments with due dates and submission workflow
+- Grading with inline feedback, rubric support, and batch tools
+- Each lesson and assignment auto-creates a discussion post in the social feed
+- Parent visibility through the existing follow system
 
 ### Safety & Security
 - Input sanitization and XSS prevention on all user input
@@ -50,7 +61,7 @@ platform for real classroom use. SparK is not yet open to the public.
 - Rate limiting on all routes
 - CSRF protection on all forms
 - Bcrypt password hashing
-- Role-based access (admins, moderators, teachers, students)
+- Role-based access (admin, teacher, student, parent)
 
 ### Platform
 - REST API
@@ -59,18 +70,26 @@ platform for real classroom use. SparK is not yet open to the public.
 - Admin CLI for user, post, and topic management
 - Pytest test suite
 
+---
+
 ## Who It's For
+
 - **Students** — a structured space to ask questions, share ideas, and learn from peers
 - **Kids / minors** — a safer alternative to unmoderated social platforms
-- **Teachers & educators** — visibility and moderation tools to manage communities
+- **Teachers & educators** — visibility and moderation tools, fast grading, and organized classroom content
 - **Parents** — a platform designed with their kids' safety as the first priority
 
+---
+
 ## Tech Stack
+
 - **Backend:** Python, Flask
 - **Database:** SQLite with FTS5 full-text search
 - **Frontend:** Jinja2, Vanilla JS
 - **Real-time:** Flask-SocketIO (WebSockets)
 - **DevOps:** Docker, GitHub Actions CI
+
+---
 
 ## Getting Started
 
@@ -108,8 +127,11 @@ sudo docker-compose up
 ### Seeding Test Data
 ```bash
 python scripts/admin.py
-# select option 15 — auto-seed
+# select option 15 — seed data
+# choose dev seed or a grade-specific demo seed (3rd, 5th, 7th, 8th grade)
 ```
+
+---
 
 ## Development
 
@@ -119,6 +141,7 @@ pytest tests/ -v
 ```
 
 ### Dev Scripts
+
 | Command | Description |
 |---------|-------------|
 | `./scripts/feature.sh` | Start a new feature branch |
@@ -134,7 +157,10 @@ pytest tests/ -v
 5. Review and merge
 6. `./scripts/done.sh` — return to main and clean up
 
+---
+
 ## Project Structure
+
 ```
 spark/
 ├── app/
@@ -151,13 +177,20 @@ spark/
 └── run.py
 ```
 
+---
+
 ## CI
+
 GitHub Actions runs tests and linting on every push. See `.github/workflows/ci.yml`.
+
+---
 
 ## Roadmap
 
 ### 🏁 Milestone: Closed Beta (single trusted classroom)
+
 The hard floor before any real users touch this platform.
+
 - [x] Core social loop — post, reply, vote, follow, feed, search, notifications
 - [x] Input sanitization / XSS prevention
 - [x] Brute force protection
@@ -166,6 +199,7 @@ The hard floor before any real users touch this platform.
 - [ ] Content moderation queue — flagged content held for review
 
 ### Phase 1 — Safety Core
+
 - [x] Input sanitization / XSS prevention
 - [x] Brute force protection — lockout after failed login attempts
 - [ ] Rate limiting on registration — prevent bot account creation
@@ -176,16 +210,27 @@ The hard floor before any real users touch this platform.
 - [ ] Age-appropriate content filtering — baseline keyword/content rules
 - [ ] COPPA compliance — Terms of Service and Privacy Policy pages (legally required for minors)
 
-### Phase 2 — Trust & Verification
+### Phase 2 — Classroom System
+
+- [ ] Classrooms — teacher-owned spaces with student enrollment via join code
+- [ ] Lessons — rich content pages with auto-created discussion posts
+- [ ] Assignments — instructions, due dates, student submissions
+- [ ] Grading — inline feedback, rubric support, batch grading, next/prev student navigation
+- [ ] Student dashboard — due this week, submission status, progress tracking
+- [ ] Teacher moderation modes — full visibility and flagged-only modes
+- [ ] Parent dashboard — visibility into student activity and submissions
+
+### Phase 3 — Trust & Verification
+
 - [ ] Email verification on register
 - [ ] Admin dashboard — proper moderation UI, not just CLI tools
-- [ ] Parent dashboard — visibility into student activity
 - [ ] Teacher pages — dedicated hosted pages for educators
-- [ ] Class/group channels — private spaces for classrooms
 - [ ] Topic moderators — role-based permissions per topic
 - [ ] School/district accounts — umbrella accounts managing multiple teacher pages
+- [ ] Teacher preview mode — demo environment before parent rollout
 
-### Phase 3 — Growth & Engagement
+### Phase 4 — Growth & Engagement
+
 - [ ] Onboarding flow — guide new users to follow topics and people on first login
 - [ ] User mentions — @username triggers a notification
 - [ ] Achievement badges — lightweight engagement without dark patterns
@@ -194,7 +239,8 @@ The hard floor before any real users touch this platform.
 - [ ] Data export — users can download their own data
 - [ ] Trending algorithm — weight posts by votes, reply count, and time decay
 
-### Phase 4 — Ops & Hardening
+### Phase 5 — Ops & Hardening
+
 - [ ] Full audit log — track all data changes with who/when/what
 - [ ] Structured logging — replace print statements with proper log levels
 - [ ] Health check endpoint — /health returns app and DB status

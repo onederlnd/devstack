@@ -53,7 +53,7 @@ def test_lockout_message_shown_on_login(client):
 
 def test_ip_lockout_after_threshold():
     for i in range(10):
-        record_failure("{i}", "127.0.0.1")
+        record_failure(f"{i}", "127.0.0.1")
     locked, _ = is_locked_out("anyuser", "127.0.0.1")
     assert locked is True
 
@@ -98,6 +98,9 @@ def test_lockout_does_not_reveal_username_exists(client):
 
 def test_failed_attempts_outside_window_do_not_count():
     """Failed attempts older thn the window should not count toward lockout"""
+    _lockouts.pop("ip:127.0.0.1", None)
+    _lockouts.pop("user:testuser", None)
+
     for _ in range(4):
         record_failure("testuser", "127.0.0.1")
 

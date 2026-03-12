@@ -53,6 +53,9 @@ def create_app(config=None):
     app.config["WTF_CSRF_SECRET_KEY"] = os.environ.get(
         "WTF_CSRF_SECRET_KEY", "dev-csrf-secret"
     )
+    app.config["SESSION_TIMEOUT_MINUTES"] = int(
+        os.environ.get("SESSION_TIMEOUT_MINUTES", 30)
+    )
 
     if config:
         app.config.update(config)
@@ -74,7 +77,7 @@ def create_app(config=None):
     from app.routes.api import api_bp
     from app.routes.settings import settings_bp
 
-    # register app
+    # register blueprints
     app.register_blueprint(auth_bp)
     app.register_blueprint(feed_bp)
     app.register_blueprint(posts_bp)
@@ -85,10 +88,32 @@ def create_app(config=None):
     app.register_blueprint(api_bp)
     app.register_blueprint(settings_bp)
 
-    # register other
     app.jinja_env.filters["time_ago"] = time_ago
 
     csrf.exempt(api_bp)
+
+    # ---- Session timeout ----
+    @app.before_request
+    def check_session_timeout():
+        from flask import session, request, redirect, url_for, flash
+
+        if not session.get("user_id"):
+            return
+        if request.endpoint == "static":
+            return
+
+        timeout_minutes = app.config["SESSION_TIMEOUT_MINUTES"]
+        last_active = session.get("last_active")
+
+        if last_active:
+            last_dt = datetime.fromisoformat(last_active)
+            elapsed = (datetime.now(timezone.utc) - last_dt).total_seconds()
+            if elapsed > timeout_minutes * 60:
+                session.clear()
+                flash("You were logged out due to inactivity.", "error")
+                return redirect(url_for("auth.login"))
+
+        session["last_active"] = datetime.now(timezone.utc).isoformat()
 
     @app.context_processor
     def inject_unread_count():
@@ -163,7 +188,6 @@ def create_app(config=None):
             message="the server encountered an internal error and was unable to complete your request.",
         ), 500
 
-    # BBCode
     @app.template_filter("bbcode")
     def bbcode_filter(text):
         return Markup(render_bbcode(text or ""))

@@ -1,6 +1,7 @@
 # app/routes/auth.py
 
 from flask import Blueprint, request, session, redirect, url_for, render_template, flash
+from datetime import datetime, timezone
 from app.models.user import create_user, check_password
 from app.utils.brute_force import is_locked_out, record_failure, record_success
 
@@ -36,7 +37,6 @@ def login():
         username = request.form["username"].strip()
         password = request.form["password"]
         ip = request.remote_addr
-
         locked, seconds_remaining = is_locked_out(username, ip)
         if locked:
             minutes = seconds_remaining // 60 + 1
@@ -49,6 +49,7 @@ def login():
             session.clear()
             session["user_id"] = user["id"]
             session["username"] = user["username"]
+            session["last_active"] = datetime.now(timezone.utc).isoformat()
             return redirect(url_for("feed.index"))
         else:
             record_failure(username, ip)
