@@ -67,7 +67,20 @@
         {% endfor %}
       </div>
     {% else %}
-      <div class="empty-state"><p>No posts yet.</p></div>
+      <div class="empty-state" style="padding:40px 20px">
+        <svg class="empty-state-icon" width="56" height="56" viewBox="0 0 56 56" fill="none">
+          <rect x="8" y="10" width="40" height="36" rx="5" stroke="currentColor" stroke-width="2"/>
+          <path d="M16 22h24M16 30h16" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="44" cy="30" r="1.5" fill="currentColor"/>
+        </svg>
+        <div class="empty-state-title">No posts yet</div>
+        {% if profile_user.id == session.user_id %}
+          <div class="empty-state-desc">Share something with your community.</div>
+          <a href="/posts/new" class="btn btn-primary btn-sm">Write First Post ✦</a>
+        {% else %}
+          <div class="empty-state-desc">{{ profile_user.username }} hasn't posted yet.</div>
+        {% endif %}
+      </div>
     {% endif %}
   </div>
 

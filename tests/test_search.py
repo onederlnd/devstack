@@ -6,7 +6,7 @@ def test_search_page_loads(auth_client):
 def test_search_empty_query(auth_client):
     response = auth_client.get("/search?q=")
     assert response.status_code == 200
-    assert b"enter a search term" in response.data
+    assert b"What are you looking for?" in response.data
 
 
 def test_search_posts(auth_client):
@@ -26,7 +26,7 @@ def test_search_posts(auth_client):
 def test_search_no_results(auth_client):
     response = auth_client.get("/search?q=notaword123")
     assert response.status_code == 200
-    assert b"no posts found" in response.data
+    assert b"No posts found" in response.data
 
 
 def test_search_topics(auth_client):

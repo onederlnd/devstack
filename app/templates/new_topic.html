@@ -13,22 +13,45 @@
 
   <form method="POST" class="post-form">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-    <label>Name</label>
-    <input type="text" name="name"
-           placeholder="e.g. math, science, reading"
-           pattern="[a-z0-9-]+"
-           maxlength="30"
-           required>
+
+    <label for="name">Name</label>
+    <div class="field-wrap">
+      <input type="text" name="name" id="name"
+        placeholder="e.g. math, science, reading"
+        pattern="[a-z0-9-]+"
+        maxlength="30"
+        required
+        oninput="updateCounter(this, 'name-counter', 30)">
+      <div class="char-counter" id="name-counter">0 / 30</div>
+    </div>
     <span class="field-hint">Lowercase letters, numbers, and hyphens only</span>
-    <label>Description</label>
-    <input type="text" name="description"
-           placeholder="What is this topic about?"
-           maxlength="100">
+
+    <label for="description">Description</label>
+    <div class="field-wrap">
+      <input type="text" name="description" id="description"
+        placeholder="What is this topic about?"
+        maxlength="100"
+        oninput="updateCounter(this, 'desc-counter', 100)">
+      <div class="char-counter" id="desc-counter">0 / 100</div>
+    </div>
+
     <div class="form-actions">
       <button type="submit" class="btn-submit">Create Topic ✦</button>
       <a href="/topics" class="btn-cancel">Cancel</a>
     </div>
   </form>
 </div>
+
+<script>
+  function updateCounter(input, counterId, max) {
+    const counter = document.getElementById(counterId);
+    if (!counter) return;
+    const len = input.value.length;
+    counter.textContent = len + ' / ' + max;
+    counter.className = 'char-counter';
+    if (len / max >= 0.95) counter.classList.add('danger');
+    else if (len / max >= 0.8) counter.classList.add('warn');
+  }
+</script>
 
 {% endblock %}

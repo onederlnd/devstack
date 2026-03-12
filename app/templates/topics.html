@@ -4,10 +4,14 @@
 {% block content %}
 
 <div class="feed-header">
-  <h1 class="feed-title">All Topics</h1>
+  <div>
+    <h1 class="feed-title">All Topics</h1>
+    <p class="feed-desc">Browse all subject areas and discussion channels</p>
+  </div>
   <a href="/topics/new" class="btn btn-primary">+ New Topic</a>
 </div>
 
+{% if topics %}
 <div class="topics-grid">
   {% for topic in topics %}
   <a href="/t/{{ topic.name }}" class="topic-card">
@@ -17,5 +21,20 @@
   </a>
   {% endfor %}
 </div>
+
+{% else %}
+<div class="empty-state">
+  <svg class="empty-state-icon" width="72" height="72" viewBox="0 0 72 72" fill="none">
+    <rect x="12" y="14" width="48" height="12" rx="4" stroke="currentColor" stroke-width="2"/>
+    <rect x="12" y="32" width="48" height="12" rx="4" stroke="currentColor" stroke-width="2"/>
+    <rect x="12" y="50" width="30" height="12" rx="4" stroke="currentColor" stroke-width="2"/>
+    <circle cx="56" cy="56" r="8" stroke="currentColor" stroke-width="2"/>
+    <path d="M53 56h6M56 53v6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+  </svg>
+  <div class="empty-state-title">No topics yet</div>
+  <div class="empty-state-desc">Topics help organize posts by subject. Create the first one!</div>
+  <a href="/topics/new" class="btn btn-primary">Create First Topic</a>
+</div>
+{% endif %}
 
 {% endblock %}

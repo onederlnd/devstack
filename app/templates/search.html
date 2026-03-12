@@ -52,9 +52,17 @@
       </div>
     {% else %}
       <div class="empty-state">
-        <p>no posts found</p>
+        <svg class="empty-state-icon" width="72" height="72" viewBox="0 0 72 72" fill="none">
+          <circle cx="32" cy="32" r="20" stroke="currentColor" stroke-width="2"/>
+          <path d="M46 46l12 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M24 32h16M32 24v16" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.4"/>
+        </svg>
+        <div class="empty-state-title">No posts found</div>
+        <div class="empty-state-desc">No posts matched "{{ query }}". Try different keywords or browse all posts.</div>
+        <a href="/" class="btn btn-primary">Browse Feed</a>
       </div>
     {% endif %}
+
   {% else %}
     {% if topics %}
       <div class="topics-grid">
@@ -68,13 +76,27 @@
       </div>
     {% else %}
       <div class="empty-state">
-        <p>No topics found for "{{ query }}"</p>
+        <svg class="empty-state-icon" width="72" height="72" viewBox="0 0 72 72" fill="none">
+          <circle cx="32" cy="32" r="20" stroke="currentColor" stroke-width="2"/>
+          <path d="M46 46l12 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M24 32h16M32 24v16" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.4"/>
+        </svg>
+        <div class="empty-state-title">No topics found</div>
+        <div class="empty-state-desc">No topics matched "{{ query }}". You could create one!</div>
+        <a href="/topics/new" class="btn btn-primary">Create Topic</a>
       </div>
     {% endif %}
   {% endif %}
+
 {% else %}
   <div class="empty-state">
-    <p>enter a search term</p>
+    <svg class="empty-state-icon" width="72" height="72" viewBox="0 0 72 72" fill="none">
+      <circle cx="32" cy="32" r="20" stroke="currentColor" stroke-width="2"/>
+      <path d="M46 46l12 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+      <path d="M25 32h14M32 25v14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+    <div class="empty-state-title">What are you looking for?</div>
+    <div class="empty-state-desc">Search for posts by title or content, or find topics by name.</div>
   </div>
 {% endif %}
 

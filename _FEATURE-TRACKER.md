@@ -61,7 +61,8 @@ ALMOST ALL HTML/JS/CSS (c/p)
 ---
 
 ## Public Release / Growth & Engagement
-### Phase 3 — Growth & Engagement (once the platform is trusted)
+### Pha.
+se 3 — Growth & Engagement (once the platform is trusted)
 - [ ] Onboarding flow — guide new users to follow topics and people on first login `[PR]`
 - [ ] User mentions — @username triggers a notification `[PR]`
 - [ ] Achievement badges — lightweight engagement without dark patterns `[PR]`

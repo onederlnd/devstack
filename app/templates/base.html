@@ -1,22 +1,80 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}SparK{% endblock %}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=5">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=6">
   <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+  <script>
+    // Apply saved theme before paint to avoid flash
+    (function() {
+      const t = localStorage.getItem('spark-theme') || 'dark';
+      document.documentElement.setAttribute('data-theme', t);
+    })();
+  </script>
 </head>
 <body>
 
+  <!-- ============ DRAWER OVERLAY ============ -->
+  <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+
+  <!-- ============ MOBILE DRAWER ============ -->
+  <div class="drawer" id="drawer">
+    <div class="drawer-header">
+      <a href="/" class="nav-logo" onclick="closeDrawer()">
+        <div class="nav-hex">⚡</div>
+        SparK
+      </a>
+      <button class="drawer-close" onclick="closeDrawer()">✕</button>
+    </div>
+
+    {% if session.username %}
+      <div class="sidebar-title">Menu</div>
+      <ul class="sidebar-nav">
+        <li><a href="/?feed=all" onclick="closeDrawer()"><span class="icon">🏠</span> Home Feed</a></li>
+        <li><a href="/?feed=following" onclick="closeDrawer()"><span class="icon">👥</span> Following</a></li>
+        <li><a href="/notifications/" onclick="closeDrawer()"><span class="icon">🔔</span> Notifications</a></li>
+        <li><a href="/profile/{{ session.username }}" onclick="closeDrawer()"><span class="icon">👤</span> My Profile</a></li>
+        <li><a href="/topics" onclick="closeDrawer()"><span class="icon">🏷️</span> Topics</a></li>
+        <li><a href="/search?type=posts" onclick="closeDrawer()"><span class="icon">🔍</span> Search</a></li>
+      </ul>
+      <div class="sidebar-divider"></div>
+      <a href="/posts/new" class="btn btn-primary" style="width:100%;justify-content:center" onclick="closeDrawer()">+ New Post</a>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-title">Account</div>
+      <ul class="sidebar-nav">
+        <li><a href="{{ url_for('settings.show_settings') }}" onclick="closeDrawer()"><span class="icon">⚙️</span> Settings</a></li>
+        <li><a href="/auth/logout" onclick="closeDrawer()"><span class="icon">🚪</span> Sign Out</a></li>
+      </ul>
+    {% else %}
+      <ul class="sidebar-nav">
+        <li><a href="/auth/login" onclick="closeDrawer()"><span class="icon">🔑</span> Sign In</a></li>
+        <li><a href="/auth/register" onclick="closeDrawer()"><span class="icon">✦</span> Join Free</a></li>
+      </ul>
+    {% endif %}
+
+    <div class="sidebar-divider"></div>
+    <div style="padding: 4px 12px;">
+      <button class="theme-toggle" onclick="toggleTheme()" style="width:100%;justify-content:center">
+        <span id="drawerThemeIcon">🌙</span>
+        <span id="drawerThemeLabel">Switch to Light</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ============ TOPBAR ============ -->
   <nav class="topbar">
+    <button class="hamburger" onclick="openDrawer()" aria-label="Menu">☰</button>
+
     <a href="/" class="nav-logo">
       <div class="nav-hex">⚡</div>
       SparK
     </a>
+
     <div class="nav-search">
       <form method="GET" action="/search">
         <span class="search-icon">🔍</span>
@@ -24,7 +82,13 @@
           value="{{ request.args.get('q', '') }}">
       </form>
     </div>
+
     <div class="nav-actions">
+      <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">
+        <span id="themeIcon">🌙</span>
+        <span class="toggle-label" id="themeLabel">Light</span>
+      </button>
+
       {% if session.username %}
         <a href="/topics" class="nav-link {% if request.path == '/topics' %}active{% endif %}">Topics</a>
         <a href="/posts/new" class="btn btn-primary">+ New Post</a>
@@ -44,7 +108,8 @@
     </div>
   </nav>
 
-{% set has_left = self.left_sidebar()|trim %}
+  <!-- ============ LAYOUT ============ -->
+  {% set has_left = self.left_sidebar()|trim %}
   {% set has_right = self.right_sidebar()|trim %}
 
   {% if has_left or has_right %}
@@ -77,6 +142,7 @@
   </div>
   {% endif %}
 
+  <!-- ============ TOAST ============ -->
   <div class="toast" id="toast">
     <div class="toast-icon">🔔</div>
     <div class="toast-body">
@@ -86,6 +152,58 @@
   </div>
 
   <script src="{{ url_for('static', filename='app.js') }}"></script>
+
+  <script>
+    // ---- Theme toggle ----
+    function applyTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('spark-theme', theme);
+      const isDark = theme === 'dark';
+      const icon = isDark ? '🌙' : '☀️';
+      const label = isDark ? 'Light' : 'Dark';
+      const drawerLabel = isDark ? 'Switch to Light' : 'Switch to Dark';
+      document.getElementById('themeIcon').textContent = icon;
+      document.getElementById('themeLabel').textContent = label;
+      document.getElementById('drawerThemeIcon').textContent = icon;
+      document.getElementById('drawerThemeLabel').textContent = drawerLabel;
+    }
+
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme') || 'dark';
+      applyTheme(current === 'dark' ? 'light' : 'dark');
+    }
+
+    // Init theme icons on load
+    (function() {
+      const t = localStorage.getItem('spark-theme') || 'dark';
+      applyTheme(t);
+    })();
+
+    // ---- Hamburger drawer ----
+    function openDrawer() {
+      const overlay = document.getElementById('drawerOverlay');
+      const drawer = document.getElementById('drawer');
+      overlay.style.display = 'block';
+      requestAnimationFrame(() => {
+        overlay.classList.add('open');
+        drawer.classList.add('open');
+      });
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeDrawer() {
+      const overlay = document.getElementById('drawerOverlay');
+      const drawer = document.getElementById('drawer');
+      overlay.classList.remove('open');
+      drawer.classList.remove('open');
+      document.body.style.overflow = '';
+      setTimeout(() => { overlay.style.display = 'none'; }, 250);
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeDrawer();
+    });
+  </script>
 
   {% if session.username %}
   <script>

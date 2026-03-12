@@ -11,6 +11,8 @@ from app.models.post import (
 from app.models.topic import get_all_topics
 from app.models.user import get_user_by_username
 from functools import wraps
+from app.utils.sanitize import sanitize_bbcode
+from app.utils.bbcode import render_bbcode
 
 api_bp = Blueprint("api", __name__, url_prefix="/api")
 
@@ -92,3 +94,17 @@ def get_profile(username):
             "posts": [dict(p) for p in posts],
         }
     )
+
+
+@api_bp.route("/preview", methods=["POST"])
+def preview():
+    """Render BBCode body to html for live preview"""
+    data = request.get_json(silent=True)
+    body = data.get("body", "")
+    if not isinstance(body, str):
+        return jsonify({"html": ""}), 400
+
+    # sanitize then render - sam pipeline as template filter
+    clean = sanitize_bbcode(body)
+    html = render_bbcode(clean)
+    return jsonify({"html": html})

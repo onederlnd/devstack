@@ -12,8 +12,12 @@
     <form method="POST" action="/profile/settings/bio" class="post-form">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <label for="bio">Bio</label>
-      <textarea name="bio" id="bio" rows="3"
-        placeholder="Tell us about yourself...">{{ user.bio or '' }}</textarea>
+      <div class="field-wrap">
+        <textarea name="bio" id="bio" rows="3" maxlength="300"
+          placeholder="Tell us about yourself..."
+          oninput="updateCounter(this, 'bio-counter', 300)">{{ user.bio or '' }}</textarea>
+        <div class="char-counter" id="bio-counter">0 / 300</div>
+      </div>
       <div class="form-actions">
         <button type="submit" class="btn-submit">Save Bio</button>
       </div>
@@ -77,5 +81,20 @@
   </div>
 
 </div>
+
+<script>
+  function updateCounter(input, counterId, max) {
+    const counter = document.getElementById(counterId);
+    if (!counter) return;
+    const len = input.value.length;
+    counter.textContent = len + ' / ' + max;
+    counter.className = 'char-counter';
+    if (len / max >= 0.95) counter.classList.add('danger');
+    else if (len / max >= 0.8) counter.classList.add('warn');
+  }
+
+  // Init counter with existing bio content
+  updateCounter(document.getElementById('bio'), 'bio-counter', 300);
+</script>
 
 {% endblock %}

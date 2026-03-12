@@ -62,6 +62,7 @@
   </div>
 </div>
 
+<!-- ====== REPLIES ====== -->
 <div class="replies-section">
   <div class="replies-heading">
     Replies
@@ -70,44 +71,118 @@
     </span>
   </div>
 
+  {% if session.username %}
   <div class="reply-form">
     <div class="compose-label">Share your thoughts</div>
     <form method="POST" action="/posts/{{ post.id }}/reply">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-      <textarea name="body" placeholder="Write a helpful reply..." rows="3" required></textarea>
+
+      <div class="editor-tabs">
+        <button type="button" class="editor-tab active" onclick="switchReplyTab(this, 'reply-write')">Write</button>
+        <button type="button" class="editor-tab" onclick="switchReplyTab(this, 'reply-preview')">Preview</button>
+      </div>
+
+      <div class="editor-pane active" id="reply-write">
+        <div class="field-wrap">
+          <textarea name="body" id="reply-body" placeholder="Write a helpful reply..." rows="3" required
+            oninput="updateCounter(this, 'reply-counter', 10000); scheduleReplyPreview()"></textarea>
+          <div class="char-counter" id="reply-counter">0 / 10000</div>
+        </div>
+      </div>
+
+      <div class="editor-pane" id="reply-preview">
+        <div class="preview-pane" id="reply-preview-output"></div>
+      </div>
+
       <div style="display:flex;justify-content:flex-end;margin-top:10px">
         <button type="submit" class="btn-submit">Post Reply ✦</button>
       </div>
     </form>
   </div>
+  {% endif %}
 
-  {% for reply in replies %}
-  <div class="reply-card">
-    <div class="vote-col">
-      <form method="POST" action="/posts/{{ reply.id }}/vote">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <input type="hidden" name="value" value="1">
-        <button class="vote-btn up">▲</button>
-      </form>
-      <span class="vote-count">{{ reply.votes }}</span>
-      <form method="POST" action="/posts/{{ reply.id }}/vote">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <input type="hidden" name="value" value="-1">
-        <button class="vote-btn down">▼</button>
-      </form>
-    </div>
-    <div class="reply-body">
-      <div class="post-meta" style="margin-bottom:10px">
-        <div class="nav-avatar" style="width:28px;height:28px;font-size:0.7rem;display:inline-flex;flex-shrink:0">
-          {{ reply.username[:2].upper() }}
-        </div>
-        <a href="/profile/{{ reply.username }}" class="post-author">{{ reply.username }}</a>
-        <span class="post-time">· {{ reply.created_at | time_ago }}</span>
+  {% if replies %}
+    {% for reply in replies %}
+    <div class="reply-card">
+      <div class="vote-col">
+        <form method="POST" action="/posts/{{ reply.id }}/vote">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="hidden" name="value" value="1">
+          <button class="vote-btn up">▲</button>
+        </form>
+        <span class="vote-count">{{ reply.votes }}</span>
+        <form method="POST" action="/posts/{{ reply.id }}/vote">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <input type="hidden" name="value" value="-1">
+          <button class="vote-btn down">▼</button>
+        </form>
       </div>
-      <p class="reply-body">{{ reply.body | bbcode }}</p>
+      <div style="flex:1;min-width:0">
+        <div class="post-meta" style="margin-bottom:10px">
+          <div class="nav-avatar" style="width:28px;height:28px;font-size:0.7rem;display:inline-flex;flex-shrink:0">
+            {{ reply.username[:2].upper() }}
+          </div>
+          <a href="/profile/{{ reply.username }}" class="post-author">{{ reply.username }}</a>
+          <span class="post-time">· {{ reply.created_at | time_ago }}</span>
+        </div>
+        <div class="reply-body">{{ reply.body | bbcode }}</div>
+      </div>
     </div>
-  </div>
-  {% endfor %}
+    {% endfor %}
+  {% else %}
+    <div class="empty-state">
+      <svg class="empty-state-icon" width="64" height="64" viewBox="0 0 64 64" fill="none">
+        <circle cx="32" cy="32" r="28" stroke="currentColor" stroke-width="2" stroke-dasharray="4 3"/>
+        <path d="M20 28h24M20 36h16" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="46" cy="36" r="1.5" fill="currentColor"/>
+      </svg>
+      <div class="empty-state-title">No replies yet</div>
+      <div class="empty-state-desc">Be the first to share your thoughts on this post.</div>
+    </div>
+  {% endif %}
 </div>
+
+<script>
+  function updateCounter(input, counterId, max) {
+    const counter = document.getElementById(counterId);
+    if (!counter) return;
+    const len = input.value.length;
+    counter.textContent = len + ' / ' + max;
+    counter.className = 'char-counter';
+    if (len / max >= 0.95) counter.classList.add('danger');
+    else if (len / max >= 0.8) counter.classList.add('warn');
+  }
+
+  function switchReplyTab(btn, paneId) {
+    document.querySelectorAll('.editor-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.editor-pane').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(paneId).classList.add('active');
+    if (paneId === 'reply-preview') renderReplyPreview();
+  }
+
+  let replyPreviewTimer = null;
+  function scheduleReplyPreview() {
+    clearTimeout(replyPreviewTimer);
+    replyPreviewTimer = setTimeout(() => {
+      const pane = document.getElementById('reply-preview');
+      if (pane && pane.classList.contains('active')) renderReplyPreview();
+    }, 300);
+  }
+
+  function renderReplyPreview() {
+    const body = document.getElementById('reply-body').value;
+    const output = document.getElementById('reply-preview-output');
+    if (!body.trim()) { output.innerHTML = ''; return; }
+    fetch('/api/preview', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ body: body })
+    })
+    .then(r => r.json())
+    .then(data => { output.innerHTML = data.html || ''; })
+    .catch(() => { output.textContent = body; });
+  }
+</script>
 
 {% endblock %}

@@ -45,4 +45,4 @@ def test_following_feed(auth_client):
 def test_following_feed_empty_state(auth_client):
     """Following feed shows empty state when not following anyone."""
     response = auth_client.get("/?feed=following")
-    assert b"no posts from followed users yet" in response.data
+    assert b"Your following feed is empty" in response.data
