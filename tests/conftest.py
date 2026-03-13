@@ -7,9 +7,37 @@ from app.utils.rate_limit import _request_counts
 from app.utils.brute_force import _lockouts
 
 
+@pytest.fixture()
+def classroom(teacher_client):
+    response = teacher_client.post(
+        "/classrooms/new",
+        data={"name": "Test Classroom"},
+    )
+
+    classroom_url = response.headers["Location"]
+    classroom_id = int(classroom_url.rstrip("/").split("/")[-1])
+    return classroom_id
+
+
+@pytest.fixture()
+def assignment(teacher_client, classroom):
+    response = teacher_client.post(
+        f"/classrooms/{classroom}/assignments/new",
+        data={
+            "title": "Test Assignment",
+            "instructions": "Solve 1-10",
+            "due_date": "2030-01-01",
+        },
+    )
+
+    assignment_url = response.headers["Location"]
+    assignment_id = int(assignment_url.rstrip("/").split("/")[-1])
+    return assignment_id
+
+
 @pytest.fixture(autouse=True)
 def reset_brute_force():
-    from app.utils.brute_force import _failed_attempts, _clean_attempts
+    from app.utils.brute_force import _failed_attempts
 
     _failed_attempts.clear()
     _lockouts.clear()
@@ -65,5 +93,22 @@ def auth_client(app):
             "password": "pass123",
         },
     )
+    return client
+
+
+@pytest.fixture(scope="function")
+def teacher_client(app):
+    """Authenticated client logged in as a teacher"""
+    client = app.test_client()
+    client.post(
+        "/auth/register",
+        data={
+            "username": "teacher1",
+            "password": "pass123",
+            "bio": "test teacher",
+            "role": "teacher",
+        },
+    )
+    client.post("/auth/login", data={"username": "teacher1", "password": "pass123"})
 
     return client

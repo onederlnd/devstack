@@ -1,4 +1,5 @@
 # app/models/__init__.py
+
 import os
 import sqlite3
 from datetime import datetime, timezone
@@ -74,6 +75,7 @@ def init_db(app):
                 username TEXT UNIQUE NOT NULL,
                 password_hash TEXT NOT NULL,
                 bio TEXT DEFAULT '',
+                role TEXT NOT NULL DEFAULT 'student',
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
 
@@ -112,7 +114,7 @@ def init_db(app):
                 PRIMARY KEY(user_id, post_id)
             );
             CREATE VIRTUAL TABLE IF NOT EXISTS posts_fts
-                USING fts5(title, body, content=posts, content_rowid=10);
+                USING fts5(title, body, content=posts, content_rowid=id);
 
             CREATE VIRTUAL TABLE IF NOT EXISTS topics_fts
                 USING fts5(name, description, content=topics, content_rowid=id);
@@ -133,6 +135,50 @@ def init_db(app):
                 link TEXT,
                 is_read INTEGER DEFAULT 0,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users(id)
+            );
+
+            CREATE TABLE IF NOT EXISTS classrooms (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                teacher_id INTEGER NOT NULL,
+                name TEXT NOT NULL,
+                description TEXT DEFAULT '',
+                join_code TEXT UNIQUE NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (teacher_id) REFERENCES users(id)
+            );
+
+            CREATE TABLE IF NOT EXISTS classroom_members (
+                classroom_id INTEGER NOT NULL,
+                user_id INTEGER NOT NULL,
+                role TEXT NOT NULL DEFAULT 'student',  -- 'teacher' or 'student'
+                joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (classroom_id, user_id),
+                FOREIGN KEY (classroom_id) REFERENCES classrooms(id),
+                FOREIGN KEY (user_id) REFERENCES users(id)
+            );
+
+            CREATE TABLE IF NOT EXISTS assignments (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                classroom_id INTEGER NOT NULL,
+                title TEXT NOT NULL,
+                instructions TEXT NOT NULL,
+                due_date TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (classroom_id) REFERENCES classrooms(id)
+            );
+
+            CREATE TABLE IF NOT EXISTS submissions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                assignment_id INTEGER NOT NULL,
+                user_id INTEGER NOT NULL,
+                body TEXT NOT NULL,
+                grade TEXT,
+                graded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                feedback TEXT DEFAULT '',
+                submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE (assignment_id, user_id),
+                FOREIGN KEY (assignment_id) REFERENCES assignments(id),
                 FOREIGN KEY (user_id) REFERENCES users(id)
             );
         """)

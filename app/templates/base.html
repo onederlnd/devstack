@@ -90,9 +90,10 @@
       </button>
 
       {% if session.username %}
-        <a href="/topics" class="nav-link {% if request.path == '/topics' %}active{% endif %}">Topics</a>
-        <a href="/posts/new" class="btn btn-primary">+ New Post</a>
-        <a href="/notifications/" class="nav-bell">
+      <a href="/classrooms" class="nav-link">Classrooms</a>
+      <a href="/topics" class="nav-link {% if request.path == '/topics' %}active{% endif %}">Topics</a>
+      <a href="/posts/new" class="btn btn-primary">+ New Post</a>
+      <a href="/notifications/" class="nav-bell">
           🔔
           {% if unread_count > 0 %}
             <span class="nav-badge">{{ unread_count }}</span>

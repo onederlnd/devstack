@@ -15,13 +15,24 @@
   </a></li>
   <li><a href="/notifications/">
     <span class="icon">🔔</span> Notifications
-    {% if unread_count > 0 %}
+    {% if session.username and unread_count > 0 %}
       <span class="nav-badge" style="position:static;margin-left:auto">{{ unread_count }}</span>
     {% endif %}
   </a></li>
+
+  {% if session.username %}
   <li><a href="/profile/{{ session.username }}">
     <span class="icon">👤</span> My Profile
   </a></li>
+  <li><a href="{{ url_for('auth.logout') }}">
+    <span class="icon">🚪</span> Logout
+  </a></li>
+  {% else %}
+  <li><a href="{{ url_for('auth.login') }}">
+    <span class="icon">🔑</span> Login
+  </a></li>
+  {% endif %}
+
   <li><a href="/search?type=posts">
     <span class="icon">🔍</span> Search
   </a></li>
@@ -70,14 +81,19 @@
   <p style="font-size:0.82rem;color:var(--muted);font-weight:500;margin-bottom:14px">
     Got something worth sharing with your community?
   </p>
+  {% if session.username %}
   <a href="/posts/new" class="btn btn-primary" style="width:100%;justify-content:center">
     + New Post
   </a>
+  {% else %}
+  <a href="{{ url_for('auth.login') }}" class="btn btn-primary" style="width:100%;justify-content:center">
+    Login to Post
+  </a>
+  {% endif %}
 </div>
 {% endblock %}
 
 {% block content %}
-
 <div class="feed-header">
   <div>
     <h1 class="feed-title">

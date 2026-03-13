@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% block title %}{{ assignment.title }} — SparK{% endblock %}
+
+{% block content %}
+
+<div style="margin-bottom: 1rem;">
+  <a href="{{ url_for('classrooms.classroom_home', classroom_id=classroom.id) }}"
+     style="color: var(--muted); font-size: 0.85rem; text-decoration: none;">
+    ← {{ classroom.name }}
+  </a>
+</div>
+
+<div class="card" style="margin-bottom: 1.5rem;">
+  <div class="card-body">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:1rem; flex-wrap:wrap;">
+      <div>
+        <h1 style="margin: 0 0 0.5rem; font-size: 1.5rem;">{{ assignment.title }}</h1>
+        {% if assignment.due_date %}
+          <div style="font-size: 0.85rem; color: var(--muted);">Due: {{ assignment.due_date }}</div>
+        {% endif %}
+      </div>
+      {% if role == 'teacher' %}
+        <a href="{{ url_for('classrooms.grade_grid', classroom_id=classroom.id, assignment_id=assignment.id) }}"
+           class="btn btn-primary">
+          Grade Submissions
+          {% if submission_count > 0 %}
+            <span style="background:var(--teal); color:#fff; border-radius:999px; padding:1px 7px; font-size:0.8rem; margin-left:4px;">
+              {{ submission_count }}
+            </span>
+          {% endif %}
+        </a>
+      {% endif %}
+    </div>
+
+    <div class="post-body" style="margin-top: 1.25rem;">
+      {{ assignment.instructions | bbcode }}
+    </div>
+  </div>
+</div>
+
+{% if role == 'student' %}
+<div class="card">
+  <div class="card-body">
+    {% if submission %}
+      <h2 style="margin:0 0 1rem; font-size:1.1rem;">Your Submission</h2>
+
+      {% if submission.grade %}
+      <div style="background: var(--soft); border-radius: 8px; padding:1rem; margin-bottom:1rem;">
+        <div style="font-size:0.8rem; color: var(--muted); margin-bottom:4px;">Grade</div>
+        <div style="font-size:1.25rem; font-weight:800; color: var(--teal);">{{ submission.grade }}</div>
+        {% if submission.feedback %}
+        <div style="margin-top:0.5rem; font-size:0.9rem; color: var(--text);">{{ submission.feedback }}</div>
+        {% endif %}
+      </div>
+      {% endif %}
+
+      <div class="post-body" style="margin-bottom:1rem;">{{ submission.body | bbcode }}</div>
+      <div style="font-size:0.8rem; color: var(--muted); margin-bottom:1rem;">
+        Submitted {{ submission.submitted_at | time_ago }}
+      </div>
+
+      <details>
+        <summary style="cursor:pointer; color:var(--muted); font-size:0.85rem;">Edit submission</summary>
+        <form method="POST" style="margin-top:1rem;">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+          <div class="editor-tabs" style="margin-bottom:0.5rem;">
+            <button type="button" class="editor-tab active" onclick="switchTab(this,'write-pane')">Write</button>
+            <button type="button" class="editor-tab" onclick="switchTab(this,'preview-pane')">Preview</button>
+          </div>
+
+          <div class="editor-pane active" id="write-pane">
+            <textarea name="body" id="body" rows="8" maxlength="10000" required
+              oninput="updateCounter(this,'body-counter',10000); schedulePreview()">{{ submission.body }}</textarea>
+            <div class="char-counter" id="body-counter">0 / 10000</div>
+          </div>
+
+          <div class="editor-pane" id="preview-pane">
+            <div class="preview-pane" id="preview-output"></div>
+          </div>
+
+          <div style="margin-top:0.75rem; text-align:right;">
+            <button type="submit" class="btn btn-primary">Update Submission</button>
+          </div>
+        </form>
+      </details>
+
+    {% else %}
+      <h2 style="margin:0 0 1rem; font-size:1.1rem;">Submit Your Work</h2>
+
+      {% if error %}
+      <div class="flash flash-error">{{ error }}</div>
+      {% endif %}
+
+      <form method="POST" class="post-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <div class="editor-tabs">
+          <button type="button" class="editor-tab active" onclick="switchTab(this,'write-pane')">Write</button>
+          <button type="button" class="editor-tab" onclick="switchTab(this,'preview-pane')">Preview</button>
+        </div>
+
+        <div class="editor-pane active" id="write-pane">
+          <textarea name="body" id="body" rows="8" maxlength="10000" required
+            placeholder="Write your response here..." oninput="updateCounter(this,'body-counter',10000); schedulePreview()"></textarea>
+          <div class="char-counter" id="body-counter">0 / 10000</div>
+        </div>
+
+        <div class="editor-pane" id="preview-pane">
+          <div class="preview-pane" id="preview-output"></div>
+        </div>
+
+        <div style="margin-top:0.75rem; text-align:right;">
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+      </form>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
+<script>
+function updateCounter(input,counterId,max){
+  const counter=document.getElementById(counterId);if(!counter)return;
+  const len=input.value.length;counter.textContent=len+' / '+max;
+  counter.className='char-counter';
+  if(len/max>=0.95)counter.classList.add('danger');else if(len/max>=0.8)counter.classList.add('warn');
+}
+updateCounter(document.getElementById('body'),'body-counter',10000);
+
+let previewTimer=null;
+function schedulePreview(){clearTimeout(previewTimer);previewTimer=setTimeout(()=>{const pane=document.getElementById('preview-pane');if(pane&&pane.classList.contains('active'))renderPreview();},300);}
+function renderPreview(){
+  const body=document.getElementById('body').value;
+  const output=document.getElementById('preview-output');
+  if(!body.trim()){output.innerHTML='';return;}
+  fetch('/api/preview',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({body})})
+    .then(r=>r.json()).then(data=>{output.innerHTML=data.html||''}).catch(()=>{output.textContent=body;});
+}
+
+function switchTab(btn,paneId){
+  document.querySelectorAll('.editor-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.editor-pane').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(paneId).classList.add('active');
+  if(paneId==='preview-pane') renderPreview();
+}
+</script>
+
+{% endblock %}

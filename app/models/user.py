@@ -6,7 +6,7 @@ from app.models import get_db
 from flask import current_app
 
 
-def create_user(username, password, bio=""):
+def create_user(username, password, bio="", role="student"):
     db = get_db()
     rounds = current_app.config.get("BCRYPT_ROUNDS", 12)
     password_hash = bcrypt.hashpw(
@@ -14,8 +14,8 @@ def create_user(username, password, bio=""):
     ).decode()
     try:
         db.execute(
-            "INSERT INTO users (username, password_hash, bio) VALUES (?, ?, ?)",
-            (username, password_hash, bio),
+            "INSERT INTO users (username, password_hash, bio, role) VALUES (?, ?, ?, ?)",
+            (username, password_hash, bio, role),
         )
         db.commit()
         return True, None

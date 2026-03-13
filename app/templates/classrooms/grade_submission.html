@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Grade — {{ assignment.title }} — SparK{% endblock %}
+
+{% block content %}
+
+<div class="form-page">
+  <div style="margin-bottom: 1rem;">
+    <a href="{{ url_for('classrooms.classroom_home', classroom_id=classroom.id) }}"
+       style="color: var(--muted); font-size: 0.85rem; text-decoration: none;">
+      ← {{ classroom.name }}
+    </a>
+  </div>
+
+  <h1 class="form-title">{{ assignment.title }}</h1>
+  <p class="form-subtitle">
+    {% if submission %}Submission for {{ submission.username }}{% else %}No submission yet{% endif %}
+  </p>
+
+  <div class="card" style="max-width: 600px; margin-top: 1rem;">
+    <form method="POST" class="post-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <label for="student">Student</label>
+      <div class="field-wrap">
+        <input type="text" id="student"
+               value="{{ submission.username if submission else 'Unknown Student' }}"
+               disabled
+               style="width:100%; padding:0.5rem; border:1px solid var(--border); border-radius:0.25rem;">
+      </div>
+
+      <label for="grade">Grade</label>
+      <div class="field-wrap">
+        <input type="text" name="grade" id="grade"
+               value="{{ submission.grade if submission else '' }}"
+               maxlength="20"
+               placeholder="Enter grade"
+               required
+               oninput="updateCounter(this, 'grade-counter', 20)"
+               style="width:100%; padding:0.5rem; border:1px solid var(--border); border-radius:0.25rem;">
+        <div class="char-counter" id="grade-counter">0 / 20</div>
+      </div>
+
+      <label for="feedback">Feedback</label>
+      <div class="field-wrap">
+        <textarea name="feedback" id="feedback" rows="5"
+                  maxlength="1000"
+                  placeholder="Optional feedback"
+                  oninput="updateCounter(this, 'feedback-counter', 1000)"
+                  style="width:100%; padding:0.5rem; border:1px solid var(--border); border-radius:0.25rem;">{{ submission.feedback if submission else '' }}</textarea>
+        <div class="char-counter" id="feedback-counter">0 / 1000</div>
+      </div>
+
+      <div class="form-actions" style="text-align:right; margin-top:1rem;">
+        <button type="submit" class="btn-submit">Save Grade</button>
+        <a href="{{ url_for('classrooms.grade_grid', classroom_id=classroom.id, assignment_id=assignment.id) }}"
+           class="btn-cancel">Back to All Grades</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function updateCounter(input, counterId, max) {
+    const counter = document.getElementById(counterId);
+    if (!counter) return;
+
+    const len = input.value.length;
+    counter.textContent = len + ' / ' + max;
+    counter.className = 'char-counter';
+
+    if (len / max >= 0.95) counter.classList.add('danger');
+    else if (len / max >= 0.8) counter.classList.add('warn');
+  }
+
+  updateCounter(document.getElementById('grade'), 'grade-counter', 20);
+  updateCounter(document.getElementById('feedback'), 'feedback-counter', 1000);
+</script>
+
+{% endblock %}

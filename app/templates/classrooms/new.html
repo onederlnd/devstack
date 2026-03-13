@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}New Classroom — SparK{% endblock %}
+
+{% block content %}
+
+<div class="form-page">
+  <h1 class="form-title">New Classroom</h1>
+  <p class="form-subtitle">Students will join using the code you'll receive after creating it</p>
+
+  {% if error %}
+    <div class="flash flash-error">{{ error }}</div>
+  {% endif %}
+
+  <form method="POST" class="post-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <!-- Classroom Name -->
+    <label for="name">Classroom Name</label>
+    <div class="field-wrap">
+      <input type="text" name="name" id="name" maxlength="80"
+        placeholder="e.g. Period 3 — English"
+        required autofocus
+        oninput="updateCounter(this, 'name-counter', 80)">
+      <div class="char-counter" id="name-counter">0 / 80</div>
+    </div>
+
+    <!-- Description -->
+    <label for="description">Description</label>
+    <div class="field-wrap">
+      <textarea name="description" id="description" rows="3" maxlength="300"
+        placeholder="What is this classroom for?"
+        oninput="updateCounter(this, 'desc-counter', 300)"></textarea>
+      <div class="char-counter" id="desc-counter">0 / 300</div>
+    </div>
+
+    <p class="field-hint">Tip: Keep the classroom name short and recognizable for students.</p>
+
+    <!-- Actions -->
+    <div class="form-actions">
+      <button type="submit" class="btn-submit">Create Classroom</button>
+      <a href="{{ url_for('classrooms.dashboard') }}" class="btn-cancel">Cancel</a>
+    </div>
+
+  </form>
+</div>
+
+<script>
+  function updateCounter(input, counterId, max) {
+    const counter = document.getElementById(counterId);
+    if (!counter) return;
+
+    const len = input.value.length;
+    counter.textContent = len + ' / ' + max;
+
+    counter.className = 'char-counter';
+
+    if (len / max >= 0.95) counter.classList.add('danger');
+    else if (len / max >= 0.8) counter.classList.add('warn');
+  }
+
+  // Initialize counters if form reloads
+  updateCounter(document.getElementById('name'), 'name-counter', 80);
+  updateCounter(document.getElementById('description'), 'desc-counter', 300);
+</script>
+
+{% endblock %}

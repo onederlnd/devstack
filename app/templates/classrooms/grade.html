@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}Grade — {{ assignment.title }} — SparK{% endblock %}
+
+{% block content %}
+
+<div style="margin-bottom: 1rem;">
+  <a href="{{ url_for('classrooms.classroom_home', classroom_id=classroom.id) }}"
+     style="color: var(--muted); font-size: 0.85rem; text-decoration: none;">
+    ← {{ classroom.name }}
+  </a>
+</div>
+
+<div class="feed-header">
+  <div>
+    <h1 class="feed-title">{{ assignment.title }}</h1>
+    <p class="feed-desc">
+      {{ grid | selectattr('submission_id') | list | length }} of {{ grid | length }} submitted
+    </p>
+  </div>
+  <a href="{{ url_for('classrooms.view_assignment', classroom_id=classroom.id, assignment_id=assignment.id) }}"
+     class="btn btn-ghost">View Assignment</a>
+</div>
+
+{% if grid %}
+  <div class="card">
+    <table style="width:100%; border-collapse:collapse;">
+      <thead>
+        <tr style="border-bottom: 1px solid var(--border);">
+          <th style="text-align:left; padding: 0.75rem 1rem; font-size:0.85rem; color:var(--muted); font-weight:600;">Student</th>
+          <th style="text-align:left; padding: 0.75rem 1rem; font-size:0.85rem; color:var(--muted); font-weight:600;">Status</th>
+          <th style="text-align:left; padding: 0.75rem 1rem; font-size:0.85rem; color:var(--muted); font-weight:600;">Grade</th>
+          <th style="text-align:left; padding: 0.75rem 1rem; font-size:0.85rem; color:var(--muted); font-weight:600;">Submitted</th>
+          <th style="padding: 0.75rem 1rem;"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in grid %}
+        <tr style="border-bottom: 1px solid var(--border);">
+          <td style="padding: 0.75rem 1rem; font-weight: 600;">{{ row.username }}</td>
+          <td style="padding: 0.75rem 1rem;">
+            {% if row.submission_id %}
+              <span style="color: var(--teal); font-size:0.85rem;">✓ Submitted</span>
+            {% else %}
+              <span style="color: var(--muted); font-size:0.85rem;">— Not submitted</span>
+            {% endif %}
+          </td>
+          <td style="padding: 0.75rem 1rem;">
+            {% if row.grade %}
+              <span style="font-weight: 700; color: var(--teal);">{{ row.grade }}</span>
+            {% elif row.submission_id %}
+              <span style="color: var(--muted); font-size:0.85rem;">Not graded</span>
+            {% else %}
+              —
+            {% endif %}
+          </td>
+          <td style="padding: 0.75rem 1rem; font-size:0.85rem; color:var(--muted);">
+            {% if row.submitted_at %}{{ row.submitted_at | time_ago }}{% else %}—{% endif %}
+          </td>
+          <td style="padding: 0.75rem 1rem; text-align:right;">
+            {% if row.submission_id %}
+              <a href="{{ url_for('classrooms.grade_submission', classroom_id=classroom.id, assignment_id=assignment.id, student_id=row.user_id) }}"
+                 class="btn btn-ghost" style="font-size:0.8rem;">
+                {% if row.grade %}Edit Grade{% else %}Grade{% endif %}
+              </a>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+{% else %}
+  <div class="empty-state">
+    <div class="empty-state-title">No students enrolled</div>
+    <div class="empty-state-desc">Share your join code so students can join.</div>
+  </div>
+{% endif %}
+
+{% endblock %}

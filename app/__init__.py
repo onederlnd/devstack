@@ -47,7 +47,7 @@ def create_app(config=None):
     init_socketio(app)
 
     app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "2ejfof2jf2ojwfxasf")
-    app.config["DATABASE_URL"] = os.environ.get("DATABASE_URL", "devstack.db")
+    app.config["DATABASE_URL"] = os.environ.get("DATABASE_URL", "data/devstack.db")
     app.config["TESTING"] = False
     app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 0
     app.config["WTF_CSRF_SECRET_KEY"] = os.environ.get(
@@ -76,6 +76,7 @@ def create_app(config=None):
     from app.routes.notifications import notifications_bp
     from app.routes.api import api_bp
     from app.routes.settings import settings_bp
+    from app.routes.classrooms import classrooms_bp
 
     # register blueprints
     app.register_blueprint(auth_bp)
@@ -87,7 +88,7 @@ def create_app(config=None):
     app.register_blueprint(notifications_bp)
     app.register_blueprint(api_bp)
     app.register_blueprint(settings_bp)
-
+    app.register_blueprint(classrooms_bp)
     app.jinja_env.filters["time_ago"] = time_ago
 
     csrf.exempt(api_bp)

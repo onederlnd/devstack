@@ -21,60 +21,65 @@
 - [x] Admin CLI tool `[PR]`
 - [x] Alembic migrations `[PR]`
 - [x] User settings page `[PR]`
+- [x] Dark/light theme toggle
+- [x] Mobile sidebar hamburger menu
+- [x] BBCode preview while typing
+- [x] Character counters on title, bio, topic name fields
+- [x] Empty state illustrations
+- [x] Input sanitization / XSS prevention `[Alpha]`
+- [x] Brute force protection `[Alpha]`
+- [x] Session timeout — auto-logout after inactivity `[Alpha]`
 
 ---
 
-## Up Next (after brute force)
-ALMOST ALL HTML/JS/CSS (c/p)
-- [ ] Dark/light theme toggle
-- [ ] Mobile sidebar hamburger menu
-- [ ] BBCode preview while typing
-- [ ] Character counters on title, bio, topic name fields
-- [ ] Empty state illustrations
-
-
-
-## Alpha / Early Testing
+## Alpha / Closed Beta
 ### Phase 1 — Safety Core (ship before any public users)
-- [x] Input sanitization / XSS prevention — sanitize all user input before rendering `[Alpha]`
-- [x] Brute force protection — lockout after failed login attempts `[Alpha]`
 - [ ] Rate limiting on registration — prevent bot account creation `[Alpha]`
-- [ ] Session timeout — auto-logout after inactivity for shared school computers `[Alpha]`
 - [ ] Report system — flag posts/users for moderation review `[Alpha]`
-- [ ] Content moderation queue — hold flagged content for review before visible `[Alpha]`
+- [ ] Content moderation queue — hold flagged content for teacher review `[Alpha]`
 - [ ] User blocking — filter content from blocked users `[Alpha]`
 - [ ] Age-appropriate content filtering — baseline keyword/content rules `[Alpha]`
-- [ ] COPPA compliance — Terms of Service and Privacy Policy pages (legally required for minors) `[Alpha]`
+- [ ] COPPA compliance — Terms of Service and Privacy Policy pages `[Alpha]`
+
+### Phase 2 — Classroom System (core product differentiator)
+- [ ] Classroom DB models — `classrooms`, `classroom_students`, `lessons`, `assignments`, `submissions` `[Alpha]`
+- [ ] Classroom dashboard — teacher overview of all classes `[Alpha]`
+- [ ] Create/join classroom — teacher creates, students join via code `[Alpha]`
+- [ ] Lessons — rich BBCode content pages with auto-created discussion thread `[Alpha]`
+- [ ] Assignments — instructions + due date + submissions + auto-created discussion thread `[Alpha]`
+- [ ] Student submissions — submit work, one per student per assignment `[Alpha]`
+- [ ] Grading UI — teacher grades submissions with feedback, next/prev student navigation `[Alpha]`
+- [ ] Submission grid — teacher sees all students + status at a glance `[Alpha]`
+- [ ] Role gating — teacher/student/parent role enforcement across all classroom routes `[Alpha]`
 
 ---
 
 ## Beta / Trust & Verification
-### Phase 2 — Trust & Verification (makes it real for parents and schools)
+### Phase 3 — Trust & Verification (makes it real for parents and schools)
 - [ ] Email verification on register `[Beta]`
 - [ ] Admin dashboard — proper moderation UI, not just CLI tools `[Beta]`
 - [ ] Parent dashboard — visibility into student activity `[Beta]`
-- [ ] Teacher pages — dedicated hosted pages for educators `[Beta]`
-- [ ] Class/group channels — private spaces for classrooms `[Beta]`
 - [ ] Topic moderators — role-based permissions per topic `[Beta]`
-- [ ] School/district accounts — umbrella accounts managing multiple teacher pages `[Beta]`
+- [ ] School/district accounts — umbrella accounts managing multiple classrooms `[Beta]`
+- [ ] Safety visibility modes — teacher can toggle full view vs flagged-only `[Beta]`
+- [ ] Auto-hide flagged content — hold for review, notify teacher immediately `[Beta]`
 
 ---
 
 ## Public Release / Growth & Engagement
-### Pha.
-se 3 — Growth & Engagement (once the platform is trusted)
-- [ ] Onboarding flow — guide new users to follow topics and people on first login `[PR]`
+### Phase 4 — Growth & Engagement (once the platform is trusted)
+- [ ] Onboarding flow — guide new users on first login `[PR]`
 - [ ] User mentions — @username triggers a notification `[PR]`
 - [ ] Achievement badges — lightweight engagement without dark patterns `[PR]`
 - [ ] Direct messages — teacher↔student only initially, not peer-to-peer `[PR]`
 - [ ] Landing page — public-facing marketing site `[PR]`
 - [ ] Data export — users can download their own data `[PR]`
-- [ ] Trending algorithm — weight posts by votes, reply count, and time decay instead of raw vote count `[PR]`
+- [ ] Trending algorithm — weight by votes, reply count, and time decay `[PR]`
 
 ---
 
 ## Ops & Hardening
-### Phase 4 — Ops & Hardening (runs alongside other phases)
+### Phase 5 — Ops & Hardening (runs alongside other phases)
 - [ ] Full audit log — track all data changes with who/when/what `[Alpha/Beta]`
 - [ ] Structured logging — replace print statements with proper log levels `[Alpha/Beta]`
 - [ ] Health check endpoint — /health returns app and DB status `[Alpha/Beta]`
@@ -82,13 +87,14 @@ se 3 — Growth & Engagement (once the platform is trusted)
 - [ ] Dependency vulnerability scanning — pip-audit in CI pipeline `[Alpha/Beta]`
 - [ ] Feature flags — toggle features on/off without deploying `[Alpha/Beta]`
 
-## Add to list
-
-
+---
 
 ## Backlog
-- [ ] Convert pasted HTML to BBCode on input (e.g. `<b>` → `[b]`, `<a href="">` → `[url=]`)
+- [ ] Rubric grading — structured scoring within assignments
+- [ ] Multiple choice / checkbox assignment types — minimize required typing for younger students
+- [ ] Homeschool mode — parent receives notifications instead of teacher
+- [ ] Convert pasted HTML to BBCode on input (`<b>` → `[b]`, `<a href="">` → `[url=]`)
 - [ ] BBCode toolbar in post/reply composer
-- [ ] Homeschool mode — parent receives lockout notifications instead of teacher
-- [ ] PWA support — manifest.json, service worker, home screen icon (2-3hrs)
+- [ ] PWA support — manifest.json, service worker, home screen icon
 - [ ] Penpals
+- [ ] User not found returns white "User not found" error page instead of formatted 

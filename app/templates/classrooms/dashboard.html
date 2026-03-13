@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}My Classrooms — SparK{% endblock %}
+
+{% block left_sidebar %}
+<div class="sidebar-title">Menu</div>
+<ul class="sidebar-nav">
+  <li><a href="/"><span class="icon">🏠</span> Home Feed</a></li>
+  <li><a href="/classrooms/"><span class="icon">🏫</span> Classrooms</a></li>
+</ul>
+{% endblock %}
+
+{% block content %}
+
+<div class="feed-header">
+  <div>
+    <h1 class="feed-title">My Classrooms</h1>
+    <p class="feed-desc">{% if is_teacher %}Manage your classrooms and assignments{% else %}Your enrolled classrooms{% endif %}</p>
+  </div>
+  {% if is_teacher %}
+    <a href="{{ url_for('classrooms.new_classroom') }}" class="btn btn-primary">+ New Classroom</a>
+  {% endif %}
+</div>
+
+{% if not is_teacher %}
+<div class="card" style="margin-bottom: 1.5rem;">
+  <div class="card-body">
+    <h3 style="margin: 0 0 0.75rem;">Join a Classroom</h3>
+    <form method="POST" action="{{ url_for('classrooms.join') }}" style="display:flex; gap: 0.75rem; align-items: center;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <input type="text" name="join_code" placeholder="Enter join code" maxlength="6"
+        class="form-input" style="text-transform:uppercase; width: 160px; letter-spacing: 0.15em; font-weight: 700;">
+      <button type="submit" class="btn btn-primary">Join</button>
+    </form>
+  </div>
+</div>
+{% endif %}
+
+{% if classrooms %}
+  <div class="topics-grid">
+    {% for classroom in classrooms %}
+    <a href="{{ url_for('classrooms.classroom_home', classroom_id=classroom.id) }}" class="topic-card">
+      <div class="topic-card-name">{{ classroom.name }}</div>
+      <div class="topic-card-desc">{{ classroom.description or "No description" }}</div>
+      <div class="topic-card-count">
+        {% if classroom.member_role == 'teacher' %}
+          <span style="color: var(--teal);">👩‍🏫 Teacher</span>
+        {% else %}
+          <span>👤 Student · {{ classroom.teacher_name }}</span>
+        {% endif %}
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+
+{% else %}
+  <div class="empty-state">
+    <svg class="empty-state-icon" width="72" height="72" viewBox="0 0 72 72" fill="none">
+      <rect x="10" y="16" width="52" height="40" rx="4" stroke="currentColor" stroke-width="2"/>
+      <path d="M10 26h52" stroke="currentColor" stroke-width="2"/>
+      <path d="M24 16v10M48 16v10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      <path d="M22 38h28M22 46h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+    {% if is_teacher %}
+      <div class="empty-state-title">No classrooms yet</div>
+      <div class="empty-state-desc">Create your first classroom to get started.</div>
+      <a href="{{ url_for('classrooms.new_classroom') }}" class="btn btn-primary">+ New Classroom</a>
+    {% else %}
+      <div class="empty-state-title">You haven't joined any classrooms</div>
+      <div class="empty-state-desc">Ask your teacher for a join code.</div>
+    {% endif %}
+  </div>
+{% endif %}
+
+{% endblock %}

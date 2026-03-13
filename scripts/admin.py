@@ -1647,14 +1647,6 @@ def _seed_grade_5(db):
             "So 9 x 7 = (10 x 7) - 7 = 70 - 7 = 63. "
             "It works every time! Does anyone else have maths tricks?",
         ),
-        (
-            parent_walsh := p1,
-            "general",
-            "Question about the homework posting feature",
-            "Hi Ms Johnson — Alex mentioned that homework gets posted here sometimes. "
-            "Is there a way to get notified when something new is posted? "
-            "I want to make sure I don't miss anything. Thanks!",
-        ),
     ]
     post_ids = _seed_posts(db, seed_posts, topic_ids)
 

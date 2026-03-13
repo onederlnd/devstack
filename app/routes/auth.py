@@ -16,12 +16,16 @@ def register():
         username = sanitize_username(request.form.get("username"))
         password = request.form["password"]
         bio = sanitize_plain(request.form.get("bio", ""), max_length=300)
+        role = request.form.get("role", "student")
+
+        if role not in ("teacher", "student"):
+            role = "student"
 
         if not username or not password:
             flash("Username and password are required", "error")
             return render_template("auth/register.html")
 
-        success, error = create_user(username, password, bio)
+        success, error = create_user(username, password, bio, role=role)
         if success:
             flash("Account created! Please log in.", "success")
             return redirect(url_for("auth.login"))

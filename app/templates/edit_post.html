@@ -31,7 +31,7 @@
     <div class="editor-pane active" id="write-pane">
       <div class="field-wrap">
         <textarea name="body" id="body" rows="8" maxlength="10000" required
-          oninput="updateCounter(this, 'body-counter', 10000); schedulePreview()">{{ post.body }}</textarea>
+        placeholder="Write your response here..." oninput="updateCounter(this, 'body-counter', 10000); schedulePreview()">{{ post.body }}</textarea>
         <div class="char-counter" id="body-counter">0 / 10000</div>
       </div>
     </div>
