@@ -42,15 +42,15 @@
 - [ ] COPPA compliance — Terms of Service and Privacy Policy pages `[Alpha]`
 
 ### Phase 2 — Classroom System (core product differentiator)
-- [ ] Classroom DB models — `classrooms`, `classroom_students`, `lessons`, `assignments`, `submissions` `[Alpha]`
-- [ ] Classroom dashboard — teacher overview of all classes `[Alpha]`
-- [ ] Create/join classroom — teacher creates, students join via code `[Alpha]`
-- [ ] Lessons — rich BBCode content pages with auto-created discussion thread `[Alpha]`
-- [ ] Assignments — instructions + due date + submissions + auto-created discussion thread `[Alpha]`
-- [ ] Student submissions — submit work, one per student per assignment `[Alpha]`
-- [ ] Grading UI — teacher grades submissions with feedback, next/prev student navigation `[Alpha]`
-- [ ] Submission grid — teacher sees all students + status at a glance `[Alpha]`
-- [ ] Role gating — teacher/student/parent role enforcement across all classroom routes `[Alpha]`
+- [x] Classroom DB models — `classrooms`, `classroom_students`, `lessons`, `assignments`, `submissions` `[Alpha]`
+- [x] Classroom dashboard — teacher overview of all classes `[Alpha]`
+- [x] Create/join classroom — teacher creates, students join via code `[Alpha]`
+- [x] Lessons — rich BBCode content pages with auto-created discussion thread `[Alpha]`
+- [x] Assignments — instructions + due date + submissions + auto-created discussion thread `[Alpha]`
+- [x] Student submissions — submit work, one per student per assignment `[Alpha]`
+- [x] Grading UI — teacher grades submissions with feedback, next/prev student navigation `[Alpha]`
+- [x] Submission grid — teacher sees all students + status at a glance `[Alpha]`
+- [x] Role gating — teacher/student/parent role enforcement across all classroom routes `[Alpha]`
 
 ---
 
