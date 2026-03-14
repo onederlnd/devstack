@@ -1,8 +1,9 @@
 # app/utils/rate_limit.py
+
 import time
 from collections import defaultdict
 from functools import wraps
-from flask import session, abort
+from flask import session, abort, request
 
 # in-memory store rate limiter {user_id: [timestamps]}
 _request_counts = defaultdict(list)
@@ -18,11 +19,10 @@ def rate_limit(max_requests, window_seconds):
         @wraps(f)
         def decorated(*args, **kwargs):
             user_id = session.get("user_id")
-            if not user_id:
-                return f(*args, **kwargs)  # not logged in, skip rate limit
+            identifier = user_id or request.remote_addr
 
             now = time.time()
-            key = f"{user_id}:{f.__name__}"
+            key = f"{identifier}:{f.__name__}"
 
             # remove timestamps outside the window
             _request_counts[key] = [
