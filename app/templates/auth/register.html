@@ -5,7 +5,14 @@
 <div class="auth-form">
   <h1>Join SparK</h1>
   <p class="form-subtitle">A safe community for students and educators</p>
-  <form method="POST">
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <div class="flash flash-{{ category }}">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+
+    <form method="POST">
     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <input name="username" placeholder="Choose a username" required autocomplete="username">
     <input name="password" type="password" placeholder="Create a password" required autocomplete="new-password">

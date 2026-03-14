@@ -4,11 +4,13 @@ from flask import Blueprint, request, session, redirect, url_for, render_templat
 from datetime import datetime, timezone
 from app.models.user import create_user, check_password
 from app.utils.brute_force import is_locked_out, record_failure, record_success
+from app.utils.rate_limit import rate_limit
 
 auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
 
 
 @auth_bp.route("/register", methods=["GET", "POST"])
+@rate_limit(max_requests=10, window_seconds=60)
 def register():
     from app.utils.sanitize import sanitize_username, sanitize_plain
 
@@ -17,6 +19,9 @@ def register():
         password = request.form["password"]
         bio = sanitize_plain(request.form.get("bio", ""), max_length=300)
         role = request.form.get("role", "student")
+
+        if rate_limit:
+            flash("Excessive registration attempts. IP limited.", "error")
 
         if role not in ("teacher", "student"):
             role = "student"

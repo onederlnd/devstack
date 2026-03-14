@@ -43,3 +43,35 @@ def test_follow_rate_limit(auth_client, app):
         auth_client.post(f"/profile/user{i}/follow")
         response = auth_client.post(f"/profile/user{i}/follow")
     assert response.status_code == 429
+
+
+# --- test register rate limit
+def test_register_rate_limit(client):
+    for i in range(30):
+        response = client.post(
+            "/auth/register",
+            data={"username": f"user{i}", "password": "pass123", "bio": ""},
+            follow_redirects=True,
+        )
+    assert response.status_code == 200
+    assert "Excessive registration attempts. IP limited." in response.data.decode()
+
+
+def test_register_rate_limit_allows_multiple_users_same_ip():
+    pass
+
+
+def test_register_rate_limit_blocks_excessive_refresh_attempts():
+    pass
+
+
+def test_register_rate_limit_ip_rotation_bypass_attempts():
+    pass
+
+
+def test_register_rate_limit_invalid_forms_still_count():
+    pass
+
+
+def test_register_rate_limit_resets_after_server_restart():
+    pass

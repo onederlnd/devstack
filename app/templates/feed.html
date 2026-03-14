@@ -7,8 +7,14 @@
 {% block left_sidebar %}
 <div class="sidebar-title">Menu</div>
 <ul class="sidebar-nav">
+  <li><a href="/search?type=posts">
+    <span class="icon">🔍</span> Search
+  </a></li>
   <li><a href="/?feed=all" class="{% if feed_type == 'all' and not active_topic %}active{% endif %}">
     <span class="icon">🏠</span> Home Feed
+  </a></li>
+  <li><a href="/classrooms">
+    <span class=""icon">🏫</span> Classrooms
   </a></li>
   <li><a href="/?feed=following" class="{% if feed_type == 'following' %}active{% endif %}">
     <span class="icon">👥</span> Following
@@ -20,6 +26,10 @@
     {% endif %}
   </a></li>
 
+
+  <li><a href="/topics">
+    <span class="icon">🏷️</span> All Topics
+  </a></li>
   {% if session.username %}
   <li><a href="/profile/{{ session.username }}">
     <span class="icon">👤</span> My Profile
@@ -32,13 +42,6 @@
     <span class="icon">🔑</span> Login
   </a></li>
   {% endif %}
-
-  <li><a href="/search?type=posts">
-    <span class="icon">🔍</span> Search
-  </a></li>
-  <li><a href="/topics">
-    <span class="icon">🏷️</span> All Topics
-  </a></li>
 </ul>
 
 <div class="sidebar-divider"></div>

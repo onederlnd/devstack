@@ -39,7 +39,7 @@
 - [ ] Content moderation queue — hold flagged content for teacher review `[Alpha]`
 - [ ] User blocking — filter content from blocked users `[Alpha]`
 - [ ] Age-appropriate content filtering — baseline keyword/content rules `[Alpha]`
-- [ ] COPPA compliance — Terms of Service and Privacy Policy pages `[Alpha]`
+- [i] COPPA compliance — Terms of Service and Privacy Policy pages `[Alpha]`
 
 ### Phase 2 — Classroom System (core product differentiator)
 - [x] Classroom DB models — `classrooms`, `classroom_students`, `lessons`, `assignments`, `submissions` `[Alpha]`
@@ -94,7 +94,7 @@
 - [ ] Multiple choice / checkbox assignment types — minimize required typing for younger students
 - [ ] Homeschool mode — parent receives notifications instead of teacher
 - [ ] Convert pasted HTML to BBCode on input (`<b>` → `[b]`, `<a href="">` → `[url=]`)
-- [ ] BBCode toolbar in post/reply composer
+- [ ] BBCode Install
 - [ ] PWA support — manifest.json, service worker, home screen icon
 - [ ] Penpals
 - [ ] User not found returns white "User not found" error page instead of formatted 

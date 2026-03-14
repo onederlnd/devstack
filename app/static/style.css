@@ -4,6 +4,7 @@
    ============================================ */
 
 /* --- DARK THEME (default) --- */
+
 :root,
 [data-theme="dark"] {
   --sky: #1e2a3a;
